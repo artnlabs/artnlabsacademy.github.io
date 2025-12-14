@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>ARTN LABS Academy</title>
+
+  <!-- Monetag Verification -->
+  <meta name="monetag" content="7c58ce94cdb234e9e4516482e481d669">
+
+</head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARTN LABS – CodeSteps: HTML Quiz</title>
+    
+    <style>
+      /* --- Basic Resets --- */
+      body { margin: 0; font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; }
+      .code-steps-container { max-width: 800px; margin: 30px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+      
+      /* --- Header and Utility (Updated Gradient) --- */
+      .header { 
+          text-align: center; 
+          padding: 20px; 
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* New Purple Gradient */
+          color: white; 
+          border-radius: 10px; 
+          margin-bottom: 25px; 
+      }
+      #batch-selector { padding: 8px 15px; border-radius: 5px; border: 1px solid #ccc; min-width: 200px; }
+      .score-card { background: #e9ecef; border-radius: 8px; padding: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+      
+      /* --- Question and Options --- */
+      .question-card { background: white; border: 1px solid #dee2e6; border-radius: 10px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+      .option { margin: 12px 0; padding: 15px; border: 1px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: all 0.2s; background: white; }
+      .option:hover { background: #f0f8ff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+      /* --- Responsive adjustments --- */
+      @media (max-width: 768px) {
+        .code-steps-container { margin: 10px; padding: 10px; }
+        .score-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+      }
+    </style>
+</head>
+<body>
+
+<div class="code-steps-container">
+  
+  <div class="header">
+    <h1 style="margin: 0; font-size: 28px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">ARTN LABS – CodeSteps</h1>
+  </div>
+
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #e9ecef; border-radius: 8px;">
+    <strong style="margin-right: 10px;">Select Batch:</strong>
+    <select id="batch-selector" onchange="loadBatch(parseInt(this.value))">
+      <option value="0">📚 Batch 1: HTML Basics</option>
+      <option value="1">📚 Batch 2: Tags &amp; Elements</option>
+      <option value="2">📚 Batch 3: Attributes</option>
+      <option value="3">📚 Batch 4: Forms &amp; Inputs</option>
+      <option value="4">📚 Batch 5: Tables &amp; Lists</option>
+      <option value="5">📚 Batch 6: Semantic HTML</option>
+      <option value="6">📚 Batch 7: Multimedia</option>
+      <option value="7">📚 Batch 8: Graphics &amp; Canvas</option>
+      <option value="8">📚 Batch 9: APIs &amp; Storage</option>
+      <option value="9">📚 Batch 10: Advanced Topics</option>
+    </select>
+    <span id="batch-info" style="float: right; color: #6c757d;">Batch 1/10 • 50 Questions</span>
+  </div>
+
+  <div class="score-card">
+    <div>
+      <strong>Score:</strong> <span id="score-value" style="color: #28a745; font-weight: bold; font-size: 24px;">0</span>
+    </div>
+    <div>
+      Question: <span id="question-counter">1</span>/<span id="total-questions">50</span>
+    </div>
+  </div>
+
+  <div style="height: 8px; background: #e9ecef; border-radius: 4px; margin: 20px 0;">
+    <div id="progress-bar" style="height: 100%; width: 0%; background: #667eea; transition: width 0.3s;"></div>
+  </div>
+
+  <div id="question-container" style="margin-bottom: 20px;"></div>
+  
+  <div class="ad-container" style="margin:30px 0;text-align:center;min-height:250px;background:#f8f9fa;border:1px dashed #dee2e6;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+    <div style="color:#6c757d;padding:20px;">
+      <p>Advertisement</p>
+      <div id="ad-zone-1"></div>
+    </div>
+  </div>
+
+  <div id="result-container" style="display: none; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #007bff;"></div>
+  <div id="completion-container" style="display: none; text-align: center; padding: 30px; background: #d4edda; color: #155724; border-radius: 10px;"></div>
+
+  <div class="ad-container" style="margin:40px 0;text-align:center;min-height:250px;background:#f8f9fa;border:1px dashed #dee2e6;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+    <div style="color:#6c757d;padding:20px;">
+      <p>Advertisement</p>
+      <div id="ad-zone-2"></div>
+    </div>
+  </div>
+
+</div> 
+
+<div style="text-align: center; margin: 30px auto; padding: 15px; max-width: 800px; color: #6c757d; font-size: 14px; border-top: 1px solid #e9ecef;">
+  © 2025 ARTN LABS. All Rights Reserved.
+</div>
+
+<script>
+// ============================================
+// 500 QUESTIONS DATABASE (10 Batches * 50 Questions Each)
+// Note: '&' has been escaped to '&amp;' for XML safety.
+// ============================================
+
+var currentBatchIndex = 0;
+var totalBatches = 10;
+var questionsPerBatch = 50; 
+
+var allQuestionBatches = [
+  // BATCH 1: HTML Basics
+  [
+  {id:1,question:"What does HTML stand for?",options:["Hyper Text Markup Language","High Tech Modern Language","Hyper Transfer Markup Language","Home Tool Markup Language"],correct:0,explanation:"HTML stands for Hyper Text Markup Language."},
+  {id:2,question:"Which tag creates a hyperlink?",options:["&lt;link&gt;","&lt;a&gt;","&lt;href&gt;","&lt;hyperlink&gt;"],correct:1,explanation:"The &lt;a&gt; tag creates hyperlinks."},
+  {id:3,question:"Which tag is for the largest heading?",options:["&lt;h1&gt;","&lt;h6&gt;","&lt;head&gt;","&lt;header&gt;"],correct:0,explanation:"&lt;h1&gt; is the largest heading."},
+  {id:4,question:"Which tag inserts a line break?",options:["&lt;br&gt;","&lt;break&gt;","&lt;lb&gt;","&lt;linebreak&gt;"],correct:0,explanation:"&lt;br&gt; tag inserts a line break."},
+  {id:5,question:"Which attribute specifies image source?",options:["src","href","link","source"],correct:0,explanation:"src attribute specifies image source."},
+  {id:6,question:"Which tag creates an unordered list?",options:["&lt;ul&gt;","&lt;ol&gt;","&lt;li&gt;","&lt;list&gt;"],correct:0,explanation:"&lt;ul&gt; creates unordered (bulleted) list."},
+  {id:7,question:"Which tag creates a paragraph?",options:["&lt;para&gt;","&lt;p&gt;","&lt;paragraph&gt;","&lt;text&gt;"],correct:1,explanation:"&lt;p&gt; tag creates a paragraph."},
+  {id:8,question:"Which tag defines a table row?",options:["&lt;tr&gt;","&lt;td&gt;","&lt;table&gt;","&lt;row&gt;"],correct:0,explanation:"&lt;tr&gt; defines a table row."},
+  {id:9,question:"Which tag is used for bold text?",options:["&lt;bold&gt;","&lt;b&gt;","&lt;strong&gt;","&lt;b&gt; and &lt;strong&gt;"],correct:3,explanation:"Both &lt;b&gt; and &lt;strong&gt; make text bold."},
+  {id:10,question:"Which tag is used for italic text?",options:["&lt;italic&gt;","&lt;i&gt;","&lt;em&gt;","&lt;i&gt; and &lt;em&gt;"],correct:3,explanation:"Both &lt;i&gt; and &lt;em&gt; make text italic."},
+  {id:11,question:"Which tag defines the title of document?",options:["&lt;title&gt;","&lt;head&gt;","&lt;header&gt;","&lt;h1&gt;"],correct:0,explanation:"&lt;title&gt; defines document title."},
+  {id:12,question:"Which tag defines a drop-down list?",options:["&lt;select&gt;","&lt;dropdown&gt;","&lt;list&gt;","&lt;option&gt;"],correct:0,explanation:"&lt;select&gt; creates a drop-down list."},
+  {id:13,question:"Which tag defines a division/section?",options:["&lt;div&gt;","&lt;section&gt;","&lt;span&gt;","&lt;part&gt;"],correct:0,explanation:"&lt;div&gt; defines a division or section."},
+  {id:14,question:"Which attribute is used for tooltip?",options:["title","tooltip","hover","info"],correct:0,explanation:"title attribute shows tooltip on hover."},
+  {id:15,question:"Which tag defines an image?",options:["&lt;img&gt;","&lt;image&gt;","&lt;pic&gt;","&lt;photo&gt;"],correct:0,explanation:"&lt;img&gt; tag defines an image."},
+  {id:16,question:"Which tag creates a numbered list?",options:["&lt;ol&gt;","&lt;ul&gt;","&lt;li&gt;","&lt;nl&gt;"],correct:0,explanation:"&lt;ol&gt; creates ordered (numbered) list."},
+  {id:17,question:"Which tag defines table data?",options:["&lt;td&gt;","&lt;tr&gt;","&lt;table&gt;","&lt;data&gt;"],correct:0,explanation:"&lt;td&gt; defines a table data cell."},
+  {id:18,question:"Which tag defines a form?",options:["&lt;form&gt;","&lt;input&gt;","&lt;submit&gt;","&lt;fieldset&gt;"],correct:0,explanation:"&lt;form&gt; tag creates an HTML form."},
+  {id:19,question:"Which input type creates a checkbox?",options:["checkbox","check","radio","toggle"],correct:0,explanation:"type='checkbox' creates a checkbox."},
+  {id:20,question:"Which tag creates a horizontal line?",options:["&lt;hr&gt;","&lt;line&gt;","&lt;hl&gt;","&lt;horizontal&gt;"],correct:0,explanation:"&lt;hr&gt; creates a horizontal line."},
+  {id:21,question:"Which tag defines the footer of a document?",options:["&lt;footer&gt;","&lt;bottom&gt;","&lt;end&gt;","&lt;close&gt;"],correct:0,explanation:"&lt;footer&gt; defines a footer section."},
+  {id:22,question:"Which tag defines navigation links?",options:["&lt;nav&gt;","&lt;navigation&gt;","&lt;links&gt;","&lt;menu&gt;"],correct:0,explanation:"&lt;nav&gt; defines navigation links."},
+  {id:23,question:"Which tag defines emphasized text?",options:["&lt;em&gt;","&lt;emphasis&gt;","&lt;strong&gt;","&lt;bold&gt;"],correct:0,explanation:"&lt;em&gt; defines emphasized text."},
+  {id:24,question:"Which tag defines marked/highlighted text?",options:["&lt;mark&gt;","&lt;highlight&gt;","&lt;color&gt;","&lt;bgcolor&gt;"],correct:0,explanation:"&lt;mark&gt; highlights text."},
+  {id:25,question:"Which tag defines subscript text?",options:["&lt;sub&gt;","&lt;sup&gt;","&lt;subscript&gt;","&lt;below&gt;"],correct:0,explanation:"&lt;sub&gt; creates subscript text."},
+  {id:26,question:"Which tag defines superscript text?",options:["&lt;sup&gt;","&lt;super&gt;","&lt;subscript&gt;","&lt;above&gt;"],correct:0,explanation:"&lt;sup&gt; creates superscript text."},
+  {id:27,question:"Which tag defines a header for a document?",options:["&lt;header&gt;","&lt;head&gt;","&lt;h1&gt;","&lt;top&gt;"],correct:0,explanation:"&lt;header&gt; defines a header section."},
+  {id:28,question:"Which tag defines an article?",options:["&lt;article&gt;","&lt;section&gt;","&lt;div&gt;","&lt;content&gt;"],correct:0,explanation:"&lt;article&gt; defines independent content."},
+  {id:29,question:"Which tag defines a section?",options:["&lt;section&gt;","&lt;div&gt;","&lt;article&gt;","&lt;part&gt;"],correct:0,explanation:"&lt;section&gt; defines a section."},
+  {id:30,question:"Which tag defines a main content area?",options:["&lt;main&gt;","&lt;body&gt;","&lt;content&gt;","&lt;primary&gt;"],correct:0,explanation:"&lt;main&gt; defines main content."},
+  {id:31,question:"Which tag defines aside content?",options:["&lt;aside&gt;","&lt;sidebar&gt;","&lt;side&gt;","&lt;extra&gt;"],correct:0,explanation:"&lt;aside&gt; defines content aside from main."},
+  {id:32,question:"Which tag defines details?",options:["&lt;details&gt;","&lt;summary&gt;","&lt;info&gt;","&lt;expand&gt;"],correct:0,explanation:"&lt;details&gt; defines additional details."},
+  {id:33,question:"Which tag defines a dialog box?",options:["&lt;dialog&gt;","&lt;modal&gt;","&lt;popup&gt;","&lt;window&gt;"],correct:0,explanation:"&lt;dialog&gt; defines a dialog box."},
+  {id:34,question:"Which tag defines a figure?",options:["&lt;figure&gt;","&lt;fig&gt;","&lt;image&gt;","&lt;picture&gt;"],correct:0,explanation:"&lt;figure&gt; defines self-contained content."},
+  {id:35,question:"Which tag defines figure caption?",options:["&lt;figcaption&gt;","&lt;caption&gt;","&lt;figtext&gt;","&lt;description&gt;"],correct:0,explanation:"&lt;figcaption&gt; defines caption for figure."},
+  {id:36,question:"Which tag defines meter?",options:["&lt;meter&gt;","&lt;gauge&gt;","&lt;progress&gt;","&lt;scale&gt;"],correct:0,explanation:"&lt;meter&gt; defines a scalar measurement."},
+  {id:37,question:"Which tag defines progress?",options:["&lt;progress&gt;","&lt;meter&gt;","&lt;bar&gt;","&lt;loading&gt;"],correct:0,explanation:"&lt;progress&gt; shows progress of a task."},
+  {id:38,question:"Which tag defines time?",options:["&lt;time&gt;","&lt;date&gt;","&lt;datetime&gt;","&lt;calendar&gt;"],correct:0,explanation:"&lt;time&gt; defines a time/date."},
+  {id:39,question:"Which tag defines a data list?",options:["&lt;datalist&gt;","&lt;list&gt;","&lt;optionlist&gt;","&lt;selectlist&gt;"],correct:0,explanation:"&lt;datalist&gt; provides pre-defined options."},
+  {id:40,question:"Which tag defines output?",options:["&lt;output&gt;","&lt;result&gt;","&lt;calculation&gt;","&lt;display&gt;"],correct:0,explanation:"&lt;output&gt; defines the result of calculation."},
+  {id:41,question:"Which tag defines a template?",options:["&lt;template&gt;","&lt;pattern&gt;","&lt;model&gt;","&lt;layout&gt;"],correct:0,explanation:"&lt;template&gt; defines hidden HTML."},
+  {id:42,question:"Which tag defines a slot?",options:["&lt;slot&gt;","&lt;placeholder&gt;","&lt;empty&gt;","&lt;space&gt;"],correct:0,explanation:"&lt;slot&gt; defines a placeholder."},
+  {id:43,question:"Which tag defines canvas?",options:["&lt;canvas&gt;","&lt;draw&gt;","&lt;paint&gt;","&lt;graphics&gt;"],correct:0,explanation:"&lt;canvas&gt; creates graphics."},
+  {id:44,question:"Which tag defines SVG?",options:["&lt;svg&gt;","&lt;vector&gt;","&lt;graphic&gt;","&lt;image&gt;"],correct:0,explanation:"&lt;svg&gt; defines SVG graphics."},
+  {id:45,question:"Which tag defines audio?",options:["&lt;audio&gt;","&lt;sound&gt;","&lt;music&gt;","&lt;player&gt;"],correct:0,explanation:"&lt;audio&gt; defines sound content."},
+  {id:46,question:"Which tag defines video?",options:["&lt;video&gt;","&lt;movie&gt;","&lt;film&gt;","&lt;media&gt;"],correct:0,explanation:"&lt;video&gt; defines video content."},
+  {id:47,question:"Which tag defines source?",options:["&lt;source&gt;","&lt;src&gt;","&lt;media&gt;","&lt;file&gt;"],correct:0,explanation:"&lt;source&gt; defines media resources."},
+  {id:48,question:"Which tag defines track?",options:["&lt;track&gt;","&lt;subtitle&gt;","&lt;caption&gt;","&lt;texttrack&gt;"],correct:0,explanation:"&lt;track&gt; defines text tracks for media."},
+  {id:49,question:"Which tag defines embed?",options:["&lt;embed&gt;","&lt;object&gt;","&lt;external&gt;","&lt;plugin&gt;"],correct:0,explanation:"&lt;embed&gt; defines embedded content."},
+  {id:50,question:"Which tag defines object?",options:["&lt;object&gt;","&lt;embed&gt;","&lt;external&gt;","&lt;plugin&gt;"],correct:0,explanation:"&lt;object&gt; defines embedded object."}
+    ],
+  
+  // BATCH 2: Tags &amp; Elements
+  [
+  {id:51,question:"Which tag defines the root of HTML document?",options:["&lt;html&gt;","&lt;root&gt;","&lt;document&gt;","&lt;!DOCTYPE&gt;"],correct:0,explanation:"&lt;html&gt; tag is the root element."},
+  {id:52,question:"Which tag contains meta information?",options:["&lt;meta&gt;","&lt;head&gt;","&lt;header&gt;","&lt;info&gt;"],correct:1,explanation:"&lt;head&gt; contains meta information."},
+  {id:53,question:"Which tag defines the document body?",options:["&lt;body&gt;","&lt;main&gt;","&lt;content&gt;","&lt;document&gt;"],correct:0,explanation:"&lt;body&gt; defines the document body."},
+  {id:54,question:"Which tag defines important text?",options:["&lt;important&gt;","&lt;strong&gt;","&lt;bold&gt;","&lt;imp&gt;"],correct:1,explanation:"&lt;strong&gt; defines important text."},
+  {id:55,question:"Which tag defines smaller text?",options:["&lt;small&gt;","&lt;tiny&gt;","&lt;mini&gt;","&lt;less&gt;"],correct:0,explanation:"&lt;small&gt; defines smaller text."},
+  {id:56,question:"Which tag defines inserted text?",options:["&lt;ins&gt;","&lt;insert&gt;","&lt;new&gt;","&lt;added&gt;"],correct:0,explanation:"&lt;ins&gt; defines inserted text."},
+  {id:57,question:"Which tag defines deleted text?",options:["&lt;del&gt;","&lt;delete&gt;","&lt;remove&gt;","&lt;strike&gt;"],correct:0,explanation:"&lt;del&gt; defines deleted text."},
+  {id:58,question:"Which tag defines inline style?",options:["&lt;span&gt;","&lt;div&gt;","&lt;style&gt;","&lt;inline&gt;"],correct:0,explanation:"&lt;span&gt; defines inline style."},
+  {id:59,question:"Which tag defines code?",options:["&lt;code&gt;","&lt;program&gt;","&lt;script&gt;","&lt;coding&gt;"],correct:0,explanation:"&lt;code&gt; defines code."},
+  {id:60,question:"Which tag defines keyboard input?",options:["&lt;kbd&gt;","&lt;keyboard&gt;","&lt;input&gt;","&lt;key&gt;"],correct:0,explanation:"&lt;kbd&gt; defines keyboard input."},
+  {id:61,question:"Which tag defines sample output?",options:["&lt;samp&gt;","&lt;output&gt;","&lt;result&gt;","&lt;show&gt;"],correct:0,explanation:"&lt;samp&gt; defines sample output."},
+  {id:62,question:"Which tag defines a variable?",options:["&lt;var&gt;","&lt;variable&gt;","&lt;v&gt;","&lt;math&gt;"],correct:0,explanation:"&lt;var&gt; defines a variable."},
+  {id:63,question:"Which tag defines preformatted text?",options:["&lt;pre&gt;","&lt;format&gt;","&lt;code&gt;","&lt;text&gt;"],correct:0,explanation:"&lt;pre&gt; defines preformatted text."},
+  {id:64,question:"Which tag defines abbreviation?",options:["&lt;abbr&gt;","&lt;abbrev&gt;","&lt;short&gt;","&lt;acronym&gt;"],correct:0,explanation:"&lt;abbr&gt; defines abbreviation."},
+  {id:65,question:"Which tag defines contact info?",options:["&lt;address&gt;","&lt;contact&gt;","&lt;info&gt;","&lt;email&gt;"],correct:0,explanation:"&lt;address&gt; defines contact info."},
+  {id:66,question:"Which tag defines bidirectional text?",options:["&lt;bdi&gt;","&lt;bdo&gt;","&lt;bidirectional&gt;","&lt;rtl&gt;"],correct:0,explanation:"&lt;bdi&gt; defines bidirectional text."},
+  {id:67,question:"Which tag defines ruby annotation?",options:["&lt;ruby&gt;","&lt;annotation&gt;","&lt;smalltext&gt;","&lt;rt&gt;"],correct:0,explanation:"&lt;ruby&gt; defines ruby annotation."},
+  {id:68,question:"Which tag defines ruby text?",options:["&lt;rt&gt;","&lt;rubytext&gt;","&lt;small&gt;","&lt;annotation&gt;"],correct:0,explanation:"&lt;rt&gt; defines ruby text."},
+  {id:69,question:"Which tag defines ruby parenthesis?",options:["&lt;rp&gt;","&lt;rubyp&gt;","&lt;parent&gt;","&lt;bracket&gt;"],correct:0,explanation:"&lt;rp&gt; defines ruby parenthesis."},
+  {id:70,question:"Which tag defines text direction?",options:["&lt;bdo&gt;","&lt;direction&gt;","&lt;textdir&gt;","&lt;bidi&gt;"],correct:0,explanation:"&lt;bdo&gt; defines text direction."},
+  {id:71,question:"Which tag defines a caption?",options:["&lt;caption&gt;","&lt;title&gt;","&lt;label&gt;","&lt;name&gt;"],correct:0,explanation:"&lt;caption&gt; defines a caption."},
+  {id:72,question:"Which tag defines a table header?",options:["&lt;th&gt;","&lt;thead&gt;","&lt;header&gt;","&lt;tableh&gt;"],correct:0,explanation:"&lt;th&gt; defines a table header."},
+  {id:73,question:"Which tag defines table footer?",options:["&lt;tfoot&gt;","&lt;footer&gt;","&lt;tablefoot&gt;","&lt;end&gt;"],correct:0,explanation:"&lt;tfoot&gt; defines table footer."},
+  {id:74,question:"Which tag defines table body?",options:["&lt;tbody&gt;","&lt;body&gt;","&lt;tablebody&gt;","&lt;content&gt;"],correct:0,explanation:"&lt;tbody&gt; defines table body."},
+  {id:75,question:"Which tag defines column group?",options:["&lt;colgroup&gt;","&lt;col&gt;","&lt;group&gt;","&lt;columns&gt;"],correct:0,explanation:"&lt;colgroup&gt; defines column group."},
+  {id:76,question:"Which tag defines a column?",options:["&lt;col&gt;","&lt;column&gt;","&lt;td&gt;","&lt;cell&gt;"],correct:0,explanation:"&lt;col&gt; defines a column."},
+  {id:77,question:"Which tag defines a label?",options:["&lt;label&gt;","&lt;name&gt;","&lt;title&gt;","&lt;text&gt;"],correct:0,explanation:"&lt;label&gt; defines a label."},
+  {id:78,question:"Which tag defines a button?",options:["&lt;button&gt;","&lt;btn&gt;","&lt;input type='button'&gt;","&lt;click&gt;"],correct:0,explanation:"&lt;button&gt; defines a button."},
+  {id:79,question:"Which tag defines a textarea?",options:["&lt;textarea&gt;","&lt;textbox&gt;","&lt;input&gt;","&lt;area&gt;"],correct:0,explanation:"&lt;textarea&gt; defines a textarea."},
+  {id:80,question:"Which tag defines a fieldset?",options:["&lt;fieldset&gt;","&lt;group&gt;","&lt;formgroup&gt;","&lt;set&gt;"],correct:0,explanation:"&lt;fieldset&gt; defines a fieldset."},
+  {id:81,question:"Which tag defines legend?",options:["&lt;legend&gt;","&lt;title&gt;","&lt;label&gt;","&lt;caption&gt;"],correct:0,explanation:"&lt;legend&gt; defines legend."},
+  {id:82,question:"Which tag defines an option?",options:["&lt;option&gt;","&lt;select&gt;","&lt;choice&gt;","&lt;item&gt;"],correct:0,explanation:"&lt;option&gt; defines an option."},
+  {id:83,question:"Which tag defines an optgroup?",options:["&lt;optgroup&gt;","&lt;group&gt;","&lt;optiongroup&gt;","&lt;selectgroup&gt;"],correct:0,explanation:"&lt;optgroup&gt; defines an optgroup."},
+  {id:84,question:"Which tag defines a list item?",options:["&lt;li&gt;","&lt;item&gt;","&lt;listitem&gt;","&lt;point&gt;"],correct:0,explanation:"&lt;li&gt; defines a list item."},
+  {id:85,question:"Which tag defines definition list?",options:["&lt;dl&gt;","&lt;def&gt;","&lt;dlist&gt;","&lt;definition&gt;"],correct:0,explanation:"&lt;dl&gt; defines definition list."},
+  {id:86,question:"Which tag defines definition term?",options:["&lt;dt&gt;","&lt;term&gt;","&lt;defterm&gt;","&lt;dd&gt;"],correct:0,explanation:"&lt;dt&gt; defines definition term."},
+  {id:87,question:"Which tag defines definition description?",options:["&lt;dd&gt;","&lt;desc&gt;","&lt;definition&gt;","&lt;dt&gt;"],correct:0,explanation:"&lt;dd&gt; defines definition description."},
+  {id:88,question:"Which tag defines a blockquote?",options:["&lt;blockquote&gt;","&lt;quote&gt;","&lt;q&gt;","&lt;citation&gt;"],correct:0,explanation:"&lt;blockquote&gt; defines a blockquote."},
+  {id:89,question:"Which tag defines a short quote?",options:["&lt;q&gt;","&lt;quote&gt;","&lt;shortquote&gt;","&lt;cite&gt;"],correct:0,explanation:"&lt;q&gt; defines a short quote."},
+  {id:90,question:"Which tag defines a citation?",options:["&lt;cite&gt;","&lt;citation&gt;","&lt;source&gt;","&lt;reference&gt;"],correct:0,explanation:"&lt;cite&gt; defines a citation."},
+  {id:91,question:"Which tag defines a definition?",options:["&lt;dfn&gt;","&lt;definition&gt;","&lt;def&gt;","&lt;meaning&gt;"],correct:0,explanation:"&lt;dfn&gt; defines a definition."},
+  {id:92,question:"Which tag defines a summary?",options:["&lt;summary&gt;","&lt;detail&gt;","&lt;info&gt;","&lt;description&gt;"],correct:0,explanation:"&lt;summary&gt; defines a summary."},
+  {id:93,question:"Which tag defines a menu?",options:["&lt;menu&gt;","&lt;nav&gt;","&lt;list&gt;","&lt;options&gt;"],correct:0,explanation:"&lt;menu&gt; defines a menu."},
+  {id:94,question:"Which tag defines a command?",options:["&lt;command&gt;","&lt;cmd&gt;","&lt;button&gt;","&lt;action&gt;"],correct:0,explanation:"&lt;command&gt; defines a command."},
+  {id:95,question:"Which tag defines a keygen?",options:["&lt;keygen&gt;","&lt;key&gt;","&lt;generate&gt;","&lt;security&gt;"],correct:0,explanation:"&lt;keygen&gt; defines a keygen."},
+  {id:96,question:"Which tag defines a param?",options:["&lt;param&gt;","&lt;parameter&gt;","&lt;value&gt;","&lt;option&gt;"],correct:0,explanation:"&lt;param&gt; defines a param."},
+  {id:97,question:"Which tag defines a picture?",options:["&lt;picture&gt;","&lt;image&gt;","&lt;img&gt;","&lt;photo&gt;"],correct:0,explanation:"&lt;picture&gt; defines a picture."},
+  {id:98,question:"Which tag defines a source for picture?",options:["&lt;source&gt;","&lt;src&gt;","&lt;image&gt;","&lt;img&gt;"],correct:0,explanation:"&lt;source&gt; defines a source for picture."},
+  {id:99,question:"Which tag defines a map?",options:["&lt;map&gt;","&lt;image&gt;","&lt;area&gt;","&lt;shape&gt;"],correct:0,explanation:"&lt;map&gt; defines a map."},
+  {id:100,question:"Which tag defines an area?",options:["&lt;area&gt;","&lt;shape&gt;","&lt;coords&gt;","&lt;maparea&gt;"],correct:0,explanation:"&lt;area&gt; defines an area."}
+  ],
+  
+  // BATCH 3: Attributes
+  [
+  {id:101,question:"Which attribute defines link URL?",options:["href","src","link","url"],correct:0,explanation:"href defines link URL."},
+  {id:102,question:"Which attribute defines image alt text?",options:["alt","title","text","description"],correct:0,explanation:"alt defines image alt text."},
+  {id:103,question:"Which attribute defines image width?",options:["width","size","w","horizontal"],correct:0,explanation:"width defines image width."},
+  {id:104,question:"Which attribute defines image height?",options:["height","size","h","vertical"],correct:0,explanation:"height defines image height."},
+  {id:105,question:"Which attribute opens link in new tab?",options:["target='_blank'","new='tab'","window='new'","open='new'"],correct:0,explanation:"target='_blank' opens link in new tab."},
+  {id:106,question:"Which attribute creates email link?",options:["href='mailto:'","href='email:'","href='send:'","href='emailto:'"],correct:0,explanation:"href='mailto:' creates email link."},
+  {id:107,question:"Which attribute creates phone link?",options:["href='tel:'","href='phone:'","href='call:'","href='dial:'"],correct:0,explanation:"href='tel:' creates phone link."},
+  {id:108,question:"Which attribute adds CSS class?",options:["class","css","style","type"],correct:0,explanation:"class adds CSS class."},
+  {id:109,question:"Which attribute adds unique ID?",options:["id","name","unique","identifier"],correct:0,explanation:"id adds unique ID."},
+  {id:110,question:"Which attribute adds inline style?",options:["style","css","design","format"],correct:0,explanation:"style adds inline style."},
+  {id:111,question:"Which attribute sets language?",options:["lang","language","locale","translate"],correct:0,explanation:"lang sets language."},
+  {id:112,question:"Which attribute specifies image map?",options:["usemap","map","ismap","imgmap"],correct:0,explanation:"usemap specifies image map."},
+  {id:113,question:"Which attribute specifies coordinates?",options:["coords","coordinates","shape","area"],correct:0,explanation:"coords specifies coordinates."},
+  {id:114,question:"Which attribute specifies table border?",options:["border","outline","frame","line"],correct:0,explanation:"border specifies table border."},
+  {id:115,question:"Which attribute specifies table cell spacing?",options:["cellspacing","spacing","distance","gap"],correct:0,explanation:"cellspacing specifies cell spacing."},
+  {id:116,question:"Which attribute specifies table cell padding?",options:["cellpadding","padding","space","inner"],correct:0,explanation:"cellpadding specifies cell padding."},
+  {id:117,question:"Which attribute specifies number of columns a cell spans?",options:["colspan","rowspan","colcount","span"],correct:0,explanation:"colspan specifies number of columns a cell spans."},
+  {id:118,question:"Which attribute specifies number of rows a cell spans?",options:["rowspan","colspan","rowcount","span"],correct:0,explanation:"rowspan specifies number of rows a cell spans."},
+  {id:119,question:"Which attribute specifies form action URL?",options:["action","method","url","target"],correct:0,explanation:"action specifies form action URL."},
+  {id:120,question:"Which attribute specifies form data submission method?",options:["method","action","submit","type"],correct:0,explanation:"method specifies form data submission method."},
+  {id:121,question:"Which attribute specifies form target window?",options:["target","window","frame","view"],correct:0,explanation:"target specifies form target window."},
+  {id:122,question:"Which attribute specifies form input type?",options:["type","input","kind","format"],correct:0,explanation:"type specifies form input type."},
+  {id:123,question:"Which attribute specifies input value?",options:["value","content","data","text"],correct:0,explanation:"value specifies input value."},
+  {id:124,question:"Which attribute specifies input name?",options:["name","id","label","title"],correct:0,explanation:"name specifies input name."},
+  {id:125,question:"Which attribute makes input required?",options:["required","must","mandatory","need"],correct:0,explanation:"required makes input required."},
+  {id:126,question:"Which attribute makes input read-only?",options:["readonly","disabled","fixed","locked"],correct:0,explanation:"readonly makes input read-only."},
+  {id:127,question:"Which attribute makes input disabled?",options:["disabled","readonly","fixed","locked"],correct:0,explanation:"disabled makes input disabled."},
+  {id:128,question:"Which attribute specifies input minimum value?",options:["min","minimum","low","start"],correct:0,explanation:"min specifies input minimum value."},
+  {id:129,question:"Which attribute specifies input maximum value?",options:["max","maximum","high","end"],correct:0,explanation:"max specifies input maximum value."},
+  {id:130,question:"Which attribute specifies input step value?",options:["step","interval","increment","jump"],correct:0,explanation:"step specifies input step value."},
+  {id:131,question:"Which attribute specifies input placeholder text?",options:["placeholder","hint","tip","text"],correct:0,explanation:"placeholder specifies input placeholder text."},
+  {id:132,question:"Which attribute specifies input pattern?",options:["pattern","regex","format","match"],correct:0,explanation:"pattern specifies input pattern."},
+  {id:133,question:"Which attribute specifies input autocomplete?",options:["autocomplete","suggest","complete","auto"],correct:0,explanation:"autocomplete specifies input autocomplete."},
+  {id:134,question:"Which attribute specifies list of pre-defined options?",options:["list","datalist","options","choices"],correct:0,explanation:"list specifies list of pre-defined options."},
+  {id:135,question:"Which attribute specifies multiple selection in select?",options:["multiple","multi","many","all"],correct:0,explanation:"multiple specifies multiple selection in select."},
+  {id:136,question:"Which attribute specifies size in select?",options:["size","rows","lines","height"],correct:0,explanation:"size specifies size in select."},
+  {id:137,question:"Which attribute specifies maximum length of input?",options:["maxlength","maxsize","length","size"],correct:0,explanation:"maxlength specifies maximum length of input."},
+  {id:138,question:"Which attribute specifies height of textarea?",options:["rows","cols","height","lines"],correct:0,explanation:"rows specifies height of textarea."},
+  {id:139,question:"Which attribute specifies width of textarea?",options:["cols","rows","width","columns"],correct:0,explanation:"cols specifies width of textarea."},
+  {id:140,question:"Which attribute specifies wrapping in textarea?",options:["wrap","overflow","textwrap","break"],correct:0,explanation:"wrap specifies wrapping in textarea."},
+  {id:141,question:"Which attribute specifies charset?",options:["charset","encoding","type","format"],correct:0,explanation:"charset specifies charset."},
+  {id:142,question:"Which attribute specifies viewport settings?",options:["viewport","meta","screen","size"],correct:0,explanation:"viewport specifies viewport settings."},
+  {id:143,question:"Which attribute specifies link type?",options:["rel","type","kind","relation"],correct:0,explanation:"rel specifies link type."},
+  {id:144,question:"Which attribute specifies link media?",options:["media","type","device","screen"],correct:0,explanation:"media specifies link media."},
+  {id:145,question:"Which attribute specifies link integrity?",options:["integrity","hash","check","secure"],correct:0,explanation:"integrity specifies link integrity."},
+  {id:146,question:"Which attribute specifies event handler for click?",options:["onclick","click","onpress","onaction"],correct:0,explanation:"onclick specifies event handler for click."},
+  {id:147,question:"Which attribute specifies event handler for load?",options:["onload","load","onready","oncomplete"],correct:0,explanation:"onload specifies event handler for load."},
+  {id:148,question:"Which attribute specifies event handler for submit?",options:["onsubmit","submit","onform","onend"],correct:0,explanation:"onsubmit specifies event handler for submit."},
+  {id:149,question:"Which attribute specifies event handler for change?",options:["onchange","change","onedit","onselect"],correct:0,explanation:"onchange specifies event handler for change."},
+  {id:150,question:"Which attribute specifies event handler for keydown?",options:["onkeydown","onkey","onpress","ondown"],correct:0,explanation:"onkeydown specifies event handler for keydown."}
+  ],
+  
+  // BATCH 4: Forms &amp; Inputs
+  [
+  {id:151,question:"Which input type is for text?",options:["text","string","char","input"],correct:0,explanation:"type='text' is for text input."},
+  {id:152,question:"Which input type is for password?",options:["password","secret","pass","pword"],correct:0,explanation:"type='password' is for password input."},
+  {id:153,question:"Which input type is for email?",options:["email","mail","address","contact"],correct:0,explanation:"type='email' is for email input."},
+  {id:154,question:"Which input type is for number?",options:["number","num","int","digit"],correct:0,explanation:"type='number' is for number input."},
+  {id:155,question:"Which input type is for range?",options:["range","slider","level","scale"],correct:0,explanation:"type='range' is for range input."},
+  {id:156,question:"Which input type is for date?",options:["date","calendar","time","day"],correct:0,explanation:"type='date' is for date input."},
+  {id:157,question:"Which input type is for time?",options:["time","clock","date","moment"],correct:0,explanation:"type='time' is for time input."},
+  {id:158,question:"Which input type is for datetime-local?",options:["datetime-local","datetime","local","date-time"],correct:0,explanation:"type='datetime-local' is for date/time input."},
+  {id:159,question:"Which input type is for color?",options:["color","hue","paint","shade"],correct:0,explanation:"type='color' is for color input."},
+  {id:160,question:"Which input type is for file upload?",options:["file","upload","document","media"],correct:0,explanation:"type='file' is for file upload."},
+  {id:161,question:"Which input type is for image button?",options:["image","img","picture","button"],correct:0,explanation:"type='image' is for image button."},
+  {id:162,question:"Which input type is for hidden data?",options:["hidden","hide","secret","data"],correct:0,explanation:"type='hidden' is for hidden data."},
+  {id:163,question:"Which input type is for month?",options:["month","mth","mon","period"],correct:0,explanation:"type='month' is for month input."},
+  {id:164,question:"Which input type is for week?",options:["week","wk","wday","day"],correct:0,explanation:"type='week' is for week input."},
+  {id:165,question:"Which input type is for URL?",options:["url","link","web","http"],correct:0,explanation:"type='url' is for URL input."},
+  {id:166,question:"Which input type is for search?",options:["search","find","query","text"],correct:0,explanation:"type='search' is for search input."},
+  {id:167,question:"Which attribute specifies file acceptance?",options:["accept","filetype","media","extension"],correct:0,explanation:"accept specifies file acceptance."},
+  {id:168,question:"Which attribute specifies file multiple selection?",options:["multiple","multi","many","all"],correct:0,explanation:"multiple specifies file multiple selection."},
+  {id:169,question:"Which attribute specifies minimum date?",options:["min","minimum","low","start"],correct:0,explanation:"min specifies minimum date."},
+  {id:170,question:"Which attribute specifies maximum date?",options:["max","maximum","high","end"],correct:0,explanation:"max specifies maximum date."},
+  {id:171,question:"Which attribute specifies image button source?",options:["src","href","link","image"],correct:0,explanation:"src specifies image button source."},
+  {id:172,question:"Which attribute specifies image button alt text?",options:["alt","title","text","description"],correct:0,explanation:"alt specifies image button alt text."},
+  {id:173,question:"Which attribute specifies form method for file upload?",options:["enctype","method","type","encoding"],correct:0,explanation:"enctype specifies form method for file upload."},
+  {id:174,question:"Which value is used for enctype for file upload?",options:["multipart/form-data","text/plain","application/x-www-form-urlencoded","file/upload"],correct:0,explanation:"multipart/form-data is used for file upload."},
+  {id:175,question:"Which attribute specifies form validation to skip?",options:["novalidate","skip","ignore","no-check"],correct:0,explanation:"novalidate specifies form validation to skip."},
+  {id:176,question:"Which element groups related elements in form?",options:["&lt;fieldset&gt;","&lt;div&gt;","&lt;section&gt;","&lt;group&gt;"],correct:0,explanation:"&lt;fieldset&gt; groups related elements."},
+  {id:177,question:"Which element provides caption for fieldset?",options:["&lt;legend&gt;","&lt;caption&gt;","&lt;title&gt;","&lt;label&gt;"],correct:0,explanation:"&lt;legend&gt; provides caption for fieldset."},
+  {id:178,question:"Which attribute links label to input?",options:["for","id","name","link"],correct:0,explanation:"for links label to input (using input's id)."},
+  {id:179,question:"Which element defines a drop-down list?",options:["&lt;select&gt;","&lt;datalist&gt;","&lt;option&gt;","&lt;input&gt;"],correct:0,explanation:"&lt;select&gt; defines a drop-down list."},
+  {id:180,question:"Which element defines an item in a drop-down list?",options:["&lt;option&gt;","&lt;item&gt;","&lt;choice&gt;","&lt;select&gt;"],correct:0,explanation:"&lt;option&gt; defines an item in a drop-down list."},
+  {id:181,question:"Which element groups options in a drop-down list?",options:["&lt;optgroup&gt;","&lt;group&gt;","&lt;optiongroup&gt;","&lt;selectgroup&gt;"],correct:0,explanation:"&lt;optgroup&gt; groups options in a drop-down list."},
+  {id:182,question:"Which attribute is used to pre-select an option?",options:["selected","checked","value","default"],correct:0,explanation:"selected is used to pre-select an option."},
+  {id:183,question:"Which attribute pre-checks a radio button/checkbox?",options:["checked","selected","value","default"],correct:0,explanation:"checked pre-checks a radio button/checkbox."},
+  {id:184,question:"Which input type defines a client-side key generator?",options:["keygen","key","generator","security"],correct:0,explanation:"type='keygen' defines a client-side key generator."},
+  {id:185,question:"Which input type defines a text area for multiple lines?",options:["textarea","textblock","multiline","input"],correct:0,explanation:"&lt;textarea&gt; defines a text area for multiple lines."},
+  {id:186,question:"Which attribute is required for radio buttons to link?",options:["name","id","value","type"],correct:0,explanation:"name attribute is required for radio buttons to link."},
+  {id:187,question:"What is the default method for a form if none is specified?",options:["GET","POST","PUT","DELETE"],correct:0,explanation:"The default method for a form is GET."},
+  {id:188,question:"Which form method sends data as URL variables?",options:["GET","POST","PUT","DELETE"],correct:0,explanation:"GET sends data as URL variables."},
+  {id:189,question:"Which form method sends data in the HTTP body?",options:["POST","GET","PUT","DELETE"],correct:0,explanation:"POST sends data in the HTTP body."},
+  {id:190,question:"What is the default value of the `enctype` attribute?",options:["application/x-www-form-urlencoded","multipart/form-data","text/plain","application/json"],correct:0,explanation:"The default value of `enctype` is application/x-www-form-urlencoded."},
+  {id:191,question:"Which attribute is used to group inputs by type?",options:["type","name","kind","format"],correct:0,explanation:"type groups inputs by type (e.g., all radio buttons)."},
+  {id:192,question:"Which attribute is used to make an element focusable?",options:["tabindex","focus","tab","index"],correct:0,explanation:"tabindex makes an element focusable."},
+  {id:193,question:"Which attribute specifies input height in pixels for image?",options:["height","size","rows","lines"],correct:0,explanation:"height specifies input height in pixels for image."},
+  {id:194,question:"Which attribute specifies input width in pixels for image?",options:["width","size","cols","columns"],correct:0,explanation:"width specifies input width in pixels for image."},
+  {id:195,question:"Which attribute specifies the list of possible values for a form control?",options:["list","options","values","choices"],correct:0,explanation:"list specifies the list of possible values for a form control."},
+  {id:196,question:"Which attribute can be used to set a default value in a textarea?",options:["value","content","text","default"],correct:0,explanation:"The content between the &lt;textarea&gt; tags sets the default value."},
+  {id:197,question:"What is the purpose of the `autofocus` attribute?",options:["Automatically focus the element on page load.","Automatically set the font size.","Automatically fill the input with data.","Automatically submit the form."],correct:0,explanation:"autofocus automatically focuses the element on page load."},
+  {id:198,question:"Which attribute can be used to define a maximum length for a number input?",options:["max","maxlength","maxnum","limit"],correct:0,explanation:"max defines the maximum value for a number input (not length)."},
+  {id:199,question:"Which tag is used to create a push button?",options:["&lt;button&gt;","&lt;input type='button'&gt;","Both A and B","&lt;submit&gt;"],correct:2,explanation:"Both &lt;button&gt; and &lt;input type='button'&gt; create a push button."},
+  {id:200,question:"Which input type defines a telephone number field?",options:["tel","phone","number","mobile"],correct:0,explanation:"type='tel' defines a telephone number field."}
+  ],
+  
+  // BATCH 5: Tables &amp; Lists
+  [
+  {id:201,question:"What is the proper order of table tags?",options:["&lt;table&gt; &lt;tr&gt; &lt;td&gt;","&lt;table&gt; &lt;td&gt; &lt;tr&gt;","&lt;tr&gt; &lt;table&gt; &lt;td&gt;","&lt;td&gt; &lt;tr&gt; &lt;table&gt;"],correct:0,explanation:"&lt;table&gt; contains &lt;tr&gt; (row), which contains &lt;td&gt; (data cell)."},
+  {id:202,question:"Which tag creates a header cell in a table?",options:["&lt;th&gt;","&lt;td&gt;","&lt;thead&gt;","&lt;header&gt;"],correct:0,explanation:"&lt;th&gt; creates a table header cell."},
+  {id:203,question:"Which tag is used for an ordered list?",options:["&lt;ol&gt;","&lt;ul&gt;","&lt;li&gt;","&lt;dl&gt;"],correct:0,explanation:"&lt;ol&gt; is for ordered (numbered/lettered) lists."},
+  {id:204,question:"Which attribute sets the start number for an ordered list?",options:["start","value","begin","index"],correct:0,explanation:"start sets the start number for an ordered list."},
+  {id:205,question:"Which CSS property controls table borders?",options:["border","outline","table-border","border-collapse"],correct:0,explanation:"border property controls table borders."},
+  {id:206,question:"Which CSS property collapses table borders into a single border?",options:["border-collapse","collapse","border-style","separate"],correct:0,explanation:"border-collapse: collapse; collapses table borders."},
+  {id:207,question:"What is the purpose of the &lt;caption&gt; tag in a table?",options:["Provides a title/caption for the table.","Defines the table header.","Defines the table footer.","Defines a table cell."],correct:0,explanation:"&lt;caption&gt; provides a title/caption for the table."},
+  {id:208,question:"Which tag is used to group table rows into a body section?",options:["&lt;tbody&gt;","&lt;trow&gt;","&lt;table-body&gt;","&lt;body&gt;"],correct:0,explanation:"&lt;tbody&gt; groups table rows into a body section."},
+  {id:209,question:"Which tag is used to group table rows into a header section?",options:["&lt;thead&gt;","&lt;tr-head&gt;","&lt;table-header&gt;","&lt;header&gt;"],correct:0,explanation:"&lt;thead&gt; groups table rows into a header section."},
+  {id:210,question:"Which tag is used to group table rows into a footer section?",options:["&lt;tfoot&gt;","&lt;tr-foot&gt;","&lt;table-footer&gt;","&lt;footer&gt;"],correct:0,explanation:"&lt;tfoot&gt; groups table rows into a footer section."},
+  {id:211,question:"Which attribute is used to set the type of marker for an unordered list?",options:["type","list-style-type","style","marker"],correct:0,explanation:"type attribute (disc, circle, square) sets the marker type."},
+  {id:212,question:"Which list style type is the default for an unordered list?",options:["disc","circle","square","none"],correct:0,explanation:"disc is the default marker type for an unordered list."},
+  {id:213,question:"Which list style type uses Roman numerals for an ordered list?",options:["type='I'","type='i'","type='R'","type='roman'"],correct:0,explanation:"type='I' uses uppercase Roman numerals."},
+  {id:214,question:"Which tag is used for a definition list?",options:["&lt;dl&gt;","&lt;dlst&gt;","&lt;deflist&gt;","&lt;list&gt;"],correct:0,explanation:"&lt;dl&gt; is for a definition list."},
+  {id:215,question:"Which tag defines the term (name) in a definition list?",options:["&lt;dt&gt;","&lt;dd&gt;","&lt;term&gt;","&lt;name&gt;"],correct:0,explanation:"&lt;dt&gt; defines the term (name)."},
+  {id:216,question:"Which tag defines the description (value) in a definition list?",options:["&lt;dd&gt;","&lt;dt&gt;","&lt;desc&gt;","&lt;value&gt;"],correct:0,explanation:"&lt;dd&gt; defines the description (value)."},
+  {id:217,question:"What is the primary use of the `colgroup` tag?",options:["To apply styles to an entire column.","To define the number of columns.","To group the table headers.","To span multiple columns in a cell."],correct:0,explanation:"To apply styles to an entire column."},
+  {id:218,question:"Which tag is used *inside* `colgroup` to specify properties for one or more columns?",options:["&lt;col&gt;","&lt;column&gt;","&lt;td&gt;","&lt;th&gt;"],correct:0,explanation:"&lt;col&gt; is used inside &lt;colgroup&gt;."},
+  {id:219,question:"Which attribute of `col` is used to specify how many columns it should span?",options:["span","cols","width","rowspan"],correct:0,explanation:"span attribute specifies how many columns it should span."},
+  {id:220,question:"Which attribute aligns content to the bottom of a table cell?",options:["valign='bottom'","align='bottom'","vertical-align: bottom","cell-align='bottom'"],correct:0,explanation:"valign='bottom' (though discouraged in favor of CSS)."},
+  {id:221,question:"What is the default text alignment in a table data cell (&lt;td&gt;)?",options:["Left","Center","Right","Justify"],correct:0,explanation:"Default text alignment in &lt;td&gt; is left."},
+  {id:222,question:"What is the default text alignment in a table header cell (&lt;th&gt;)?",options:["Center","Left","Right","Justify"],correct:0,explanation:"Default text alignment in &lt;th&gt; is center."},
+  {id:223,question:"Which HTML element is used to add a row to a table?",options:["&lt;tr&gt;","&lt;td&gt;","&lt;th&gt;","&lt;row&gt;"],correct:0,explanation:"&lt;tr&gt; adds a row to a table."},
+  {id:224,question:"Which attribute of &lt;ol&gt; is used to reverse the order of list items?",options:["reversed","reverse","order","descending"],correct:0,explanation:"reversed attribute reverses the order of list items."},
+  {id:225,question:"Which CSS property sets the spacing between the content and the cell border?",options:["padding","margin","cellspacing","border-spacing"],correct:0,explanation:"padding property sets the spacing between the content and the cell border."},
+  {id:226,question:"Which CSS property sets the spacing between table cells?",options:["border-spacing","cellspacing","margin","padding"],correct:0,explanation:"border-spacing sets the spacing between table cells."},
+  {id:227,question:"What is the name of the smallest unit of information in a table?",options:["Cell","Row","Column","Header"],correct:0,explanation:"Cell is the smallest unit of information."},
+  {id:228,question:"The `compact` attribute on &lt;ul&gt; and &lt;ol&gt; is:",options:["Deprecated in HTML5.","Required in HTML5.","Used to make the list markers bold.","Used to change the list style."],correct:0,explanation:"The `compact` attribute is deprecated in HTML5."},
+  {id:229,question:"Which value for the `type` attribute in &lt;ol&gt; gives uppercase letters?",options:["A","a","I","i"],correct:0,explanation:"type='A' gives uppercase letters."},
+  {id:230,question:"Which value for the `type` attribute in &lt;ol&gt; gives lowercase letters?",options:["a","A","i","I"],correct:0,explanation:"type='a' gives lowercase letters."},
+  {id:231,question:"Which tag is typically used to contain `&lt;li&gt;` elements?",options:["&lt;ul&gt; or &lt;ol&gt;","&lt;p&gt; or &lt;div&gt;","&lt;dl&gt; or &lt;dt&gt;","&lt;section&gt; or &lt;article&gt;"],correct:0,explanation:"&lt;ul&gt; or &lt;ol&gt; contain &lt;li&gt; elements."},
+  {id:232,question:"Which HTML tag is used for a section of content that is quoted from another source?",options:["&lt;blockquote&gt;","&lt;q&gt;","&lt;cite&gt;","&lt;source&gt;"],correct:0,explanation:"&lt;blockquote&gt; is for block (long) quotes."},
+  {id:233,question:"Which tag is used for a short inline quotation?",options:["&lt;q&gt;","&lt;blockquote&gt;","&lt;quote&gt;","&lt;citation&gt;"],correct:0,explanation:"&lt;q&gt; is for short inline quotations."},
+  {id:234,question:"Which attribute on &lt;blockquote&gt; specifies the source of the citation?",options:["cite","source","href","link"],correct:0,explanation:"cite attribute specifies the source URL."},
+  {id:235,question:"Which tag is used to mark text as an address?",options:["&lt;address&gt;","&lt;contact&gt;","&lt;info&gt;","&lt;location&gt;"],correct:0,explanation:"&lt;address&gt; marks text as an address."},
+  {id:236,question:"Which tag indicates that the text is an abbreviation?",options:["&lt;abbr&gt;","&lt;acronym&gt;","&lt;short&gt;","&lt;title&gt;"],correct:0,explanation:"&lt;abbr&gt; indicates an abbreviation."},
+  {id:237,question:"Which attribute on &lt;abbr&gt; provides the full description?",options:["title","full","description","text"],correct:0,explanation:"title attribute provides the full description (tooltip)."},
+  {id:238,question:"The &lt;acronym&gt; tag is:",options:["Deprecated in HTML5.","Preferred over &lt;abbr&gt;.","Used for all abbreviations.","Used only for technical terms."],correct:0,explanation:"The &lt;acronym&gt; tag is deprecated in HTML5."},
+  {id:239,question:"Which HTML tag is used to strike-through or delete text?",options:["&lt;del&gt;","&lt;s&gt;","&lt;strike&gt;","All of the above"],correct:3,explanation:"All of the above are used, but &lt;del&gt; and &lt;s&gt; are preferred over &lt;strike&gt;."},
+  {id:240,question:"Which HTML tag is used to insert underlined or newly added text?",options:["&lt;ins&gt;","&lt;u&gt;","&lt;added&gt;","Both &lt;ins&gt; and &lt;u&gt;"],correct:3,explanation:"Both &lt;ins&gt; and &lt;u&gt; are used, but &lt;ins&gt; is semantically better for inserted content."},
+  {id:241,question:"Which attribute of &lt;ins&gt; or &lt;del&gt; is used to show the date/time of change?",options:["datetime","date","time","timestamp"],correct:0,explanation:"datetime attribute shows the date/time of change."},
+  {id:242,question:"Which tag is used to define source code fragment?",options:["&lt;code&gt;","&lt;pre&gt;","&lt;script&gt;","&lt;source&gt;"],correct:0,explanation:"&lt;code&gt; defines a source code fragment."},
+  {id:243,question:"Which tag is used for displaying preformatted text, preserving spaces and line breaks?",options:["&lt;pre&gt;","&lt;code&gt;","&lt;p&gt;","&lt;format&gt;"],correct:0,explanation:"&lt;pre&gt; displays preformatted text."},
+  {id:244,question:"Which tag is used to define keyboard input?",options:["&lt;kbd&gt;","&lt;key&gt;","&lt;input&gt;","&lt;code&gt;"],correct:0,explanation:"&lt;kbd&gt; defines keyboard input."},
+  {id:245,question:"Which tag is used to define sample output from a computer program?",options:["&lt;samp&gt;","&lt;output&gt;","&lt;result&gt;","&lt;code&gt;"],correct:0,explanation:"&lt;samp&gt; defines sample output from a computer program."},
+  {id:246,question:"Which tag is used to define a variable in a mathematical expression or programming context?",options:["&lt;var&gt;","&lt;variable&gt;","&lt;v&gt;","&lt;i&gt;"],correct:0,explanation:"&lt;var&gt; defines a variable."},
+  {id:247,question:"Which HTML tag is used for defining a citation or reference to a creative work?",options:["&lt;cite&gt;","&lt;quotation&gt;","&lt;source&gt;","&lt;reference&gt;"],correct:0,explanation:"&lt;cite&gt; defines a citation/reference."},
+  {id:248,question:"Which HTML tag is used to emphasize text (usually displayed as italic)?",options:["&lt;em&gt;","&lt;i&gt;","&lt;italic&gt;","&lt;strong&gt;"],correct:0,explanation:"&lt;em&gt; emphasizes text."},
+  {id:249,question:"Which HTML tag is used to define important text (usually displayed as bold)?",options:["&lt;strong&gt;","&lt;b&gt;","&lt;important&gt;","&lt;em&gt;"],correct:0,explanation:"&lt;strong&gt; defines important text."},
+  {id:250,question:"Which HTML tag is used to mark text as no longer accurate or relevant?",options:["&lt;s&gt;","&lt;del&gt;","&lt;strike&gt;","&lt;u&gt;"],correct:0,explanation:"&lt;s&gt; marks text as no longer accurate or relevant (strikethrough)."}
+  ],
+
+  // BATCH 6: Semantic HTML
+  [
+  {id:251,question:"Which HTML5 element is used for standalone, complete content?",options:["&lt;article&gt;","&lt;section&gt;","&lt;div&gt;","&lt;main&gt;"],correct:0,explanation:"&lt;article&gt; is for standalone, complete content."},
+  {id:252,question:"Which HTML5 element is used to group related content?",options:["&lt;section&gt;","&lt;article&gt;","&lt;div&gt;","&lt;group&gt;"],correct:0,explanation:"&lt;section&gt; is used to group related content."},
+  {id:253,question:"Which HTML5 element is used for the main content of the document?",options:["&lt;main&gt;","&lt;body&gt;","&lt;content&gt;","&lt;section&gt;"],correct:0,explanation:"&lt;main&gt; represents the main content."},
+  {id:254,question:"Which HTML5 element is used for navigation links?",options:["&lt;nav&gt;","&lt;menu&gt;","&lt;links&gt;","&lt;header&gt;"],correct:0,explanation:"&lt;nav&gt; is for navigation links."},
+  {id:255,question:"Which HTML5 element defines a header for a document or section?",options:["&lt;header&gt;","&lt;head&gt;","&lt;h1&gt;","&lt;top&gt;"],correct:0,explanation:"&lt;header&gt; defines a header for a document or section."},
+  {id:256,question:"Which HTML5 element defines a footer for a document or section?",options:["&lt;footer&gt;","&lt;bottom&gt;","&lt;end&gt;","&lt;close&gt;"],correct:0,explanation:"&lt;footer&gt; defines a footer for a document or section."},
+  {id:257,question:"Which HTML5 element is used for content tangentially related to the main content (like a sidebar)?",options:["&lt;aside&gt;","&lt;sidebar&gt;","&lt;extra&gt;","&lt;section&gt;"],correct:0,explanation:"&lt;aside&gt; is for tangentially related content (like a sidebar)."},
+  {id:258,question:"Which HTML5 element defines a figure/image and its caption?",options:["&lt;figure&gt;","&lt;figcaption&gt;","&lt;img&gt;","&lt;pic&gt;"],correct:0,explanation:"&lt;figure&gt; defines a figure/image and its caption."},
+  {id:259,question:"Which HTML5 element is used to define the caption for a &lt;figure&gt;?",options:["&lt;figcaption&gt;","&lt;caption&gt;","&lt;figtext&gt;","&lt;desc&gt;"],correct:0,explanation:"&lt;figcaption&gt; defines the caption for a &lt;figure&gt;."},
+  {id:260,question:"Which HTML5 element is used to highlight or mark text?",options:["&lt;mark&gt;","&lt;highlight&gt;","&lt;strong&gt;","&lt;span&gt;"],correct:0,explanation:"&lt;mark&gt; is used to highlight or mark text."},
+  {id:261,question:"What is the proper use of the &lt;small&gt; tag in HTML5?",options:["To represent side comments or copyright text.","To make the text physically smaller.","To make the text unimportant.","To define an inline style."],correct:0,explanation:"To represent side comments or copyright text (semantically)."},
+  {id:262,question:"Which element represents a generic span of inline content?",options:["&lt;span&gt;","&lt;div&gt;","&lt;p&gt;","&lt;text&gt;"],correct:0,explanation:"&lt;span&gt; represents a generic span of inline content."},
+  {id:263,question:"Which element represents a generic section of content (block-level)?",options:["&lt;div&gt;","&lt;span&gt;","&lt;section&gt;","&lt;p&gt;"],correct:0,explanation:"&lt;div&gt; represents a generic section of block-level content."},
+  {id:264,question:"Which element is used to define a list of items for a menu of commands?",options:["&lt;menu&gt;","&lt;nav&gt;","&lt;ul&gt;","&lt;ol&gt;"],correct:0,explanation:"&lt;menu&gt; is used to define a list of items for a menu of commands."},
+  {id:265,question:"Which tag is used to define the primary date and/or time information?",options:["&lt;time&gt;","&lt;date&gt;","&lt;datetime&gt;","&lt;span&gt;"],correct:0,explanation:"&lt;time&gt; defines the primary date and/or time information."},
+  {id:266,question:"Which attribute of &lt;time&gt; provides a machine-readable format?",options:["datetime","value","format","date"],correct:0,explanation:"datetime attribute provides a machine-readable format."},
+  {id:267,question:"Which tag is used to show the result of a calculation?",options:["&lt;output&gt;","&lt;result&gt;","&lt;samp&gt;","&lt;data&gt;"],correct:0,explanation:"&lt;output&gt; shows the result of a calculation."},
+  {id:268,question:"Which tag is used to represent the current progress of a task?",options:["&lt;progress&gt;","&lt;meter&gt;","&lt;bar&gt;","&lt;level&gt;"],correct:0,explanation:"&lt;progress&gt; represents the current progress of a task."},
+  {id:269,question:"Which tag is used to represent a scalar measurement within a known range?",options:["&lt;meter&gt;","&lt;progress&gt;","&lt;range&gt;","&lt;gauge&gt;"],correct:0,explanation:"&lt;meter&gt; represents a scalar measurement within a known range."},
+  {id:270,question:"Which tag is used for collapsible details (summary and details)?",options:["&lt;details&gt;","&lt;summary&gt;","&lt;collapse&gt;","&lt;expand&gt;"],correct:0,explanation:"&lt;details&gt; is used for collapsible details."},
+  {id:271,question:"Which tag is used as a summary/caption for a &lt;details&gt; element?",options:["&lt;summary&gt;","&lt;details-title&gt;","&lt;caption&gt;","&lt;title&gt;"],correct:0,explanation:"&lt;summary&gt; is used as a summary/caption for &lt;details&gt;."},
+  {id:272,question:"Which element is used to define a section of content that is explicitly quoted?",options:["&lt;blockquote&gt;","&lt;q&gt;","&lt;cite&gt;","&lt;quotation&gt;"],correct:0,explanation:"&lt;blockquote&gt; is for explicit block quotes."},
+  {id:273,question:"Which element is used to define a custom, hidden template for later use?",options:["&lt;template&gt;","&lt;hidden&gt;","&lt;model&gt;","&lt;blueprint&gt;"],correct:0,explanation:"&lt;template&gt; defines a custom, hidden template."},
+  {id:274,question:"Which element provides a container for media resources for the &lt;video&gt; and &lt;audio&gt; elements?",options:["&lt;source&gt;","&lt;src&gt;","&lt;media&gt;","&lt;track&gt;"],correct:0,explanation:"&lt;source&gt; provides a container for media resources."},
+  {id:275,question:"Which element defines text tracks for media elements (&lt;audio&gt; and &lt;video&gt;)?",options:["&lt;track&gt;","&lt;caption&gt;","&lt;subtitle&gt;","&lt;text&gt;"],correct:0,explanation:"&lt;track&gt; defines text tracks for media elements."},
+  {id:276,question:"The &lt;hgroup&gt; tag is:",options:["Deprecated in HTML5.","Required to group headings.","Used only for multiple h1 tags.","Used for the primary heading."],correct:0,explanation:"The &lt;hgroup&gt; tag is deprecated in HTML5."},
+  {id:277,question:"What is the primary difference between &lt;b&gt; and &lt;strong&gt;?",options:["&lt;strong&gt; has semantic importance, &lt;b&gt; is merely styling.","&lt;b&gt; is deprecated, &lt;strong&gt; is not.","&lt;b&gt; is block-level, &lt;strong&gt; is inline.","There is no difference."],correct:0,explanation:"&lt;strong&gt; indicates importance/urgency, &lt;b&gt; is for visual distinction without importance."},
+  {id:278,question:"What is the primary difference between &lt;i&gt; and &lt;em&gt;?",options:["&lt;em&gt; has semantic emphasis, &lt;i&gt; is merely styling.","&lt;i&gt; is deprecated, &lt;em&gt; is not.","&lt;i&gt; is block-level, &lt;em&gt; is inline.","There is no difference."],correct:0,explanation:"&lt;em&gt; indicates emphasis, &lt;i&gt; is for alternative voice/mood (e.g., taxonomy, technical terms)."},
+  {id:279,question:"The use of `&lt;br&gt;` for spacing is:",options:["Discouraged in HTML5.","Required for spacing.","Only for line breaks in code.","Only for poetry."],correct:0,explanation:"Discouraged. Use CSS margin/padding for spacing."},
+  {id:280,question:"Which attribute is used to provide a tooltip for an element?",options:["title","tooltip","hint","info"],correct:0,explanation:"title attribute provides a tooltip."},
+  {id:281,question:"Which attribute specifies an element's custom data?",options:["data-*","custom-data","user-data","attribute"],correct:0,explanation:"data-* attributes are for custom data."},
+  {id:282,question:"Which attribute controls whether content is editable by the user?",options:["contenteditable","editable","edit","user-edit"],correct:0,explanation:"contenteditable controls whether content is editable."},
+  {id:283,question:"Which attribute specifies that an element should not be dragged?",options:["draggable='false'","drag='off'","no-drag","nodrag"],correct:0,explanation:"draggable='false' specifies that an element should not be dragged."},
+  {id:284,question:"What is the purpose of the `hidden` attribute?",options:["Hides the element from the user and screen readers.","Hides the element from the user only.","Hides the element from screen readers only.","Prevents the element from being styled."],correct:0,explanation:"Hides the element from the user and screen readers."},
+  {id:285,question:"Which attribute is used to provide the user with a keyboard shortcut?",options:["accesskey","shortcut","key","altkey"],correct:0,explanation:"accesskey provides a keyboard shortcut."},
+  {id:286,question:"Which attribute specifies the direction of the element's text?",options:["dir","direction","text-direction","rtl"],correct:0,explanation:"dir specifies the direction of the element's text (ltr or rtl)."},
+  {id:287,question:"Which attribute specifies whether an element is relevant?",options:["itemprop","itemscope","itemtype","relevant"],correct:0,explanation:"itemprop specifies a property of its container."},
+  {id:288,question:"Which element is used to denote a container for a web component's Shadow DOM content?",options:["&lt;slot&gt;","&lt;shadow&gt;","&lt;container&gt;","&lt;webcomp&gt;"],correct:0,explanation:"&lt;slot&gt; denotes a container for a web component's Shadow DOM content."},
+  {id:289,question:"Which tag is used to define an important part of a text in a different voice or quality?",options:["&lt;dfn&gt;","&lt;em&gt;","&lt;i&gt;","&lt;var&gt;"],correct:0,explanation:"&lt;dfn&gt; defines an important part of a text in a different voice or quality."},
+  {id:290,question:"Which attribute is used to specify the relationship between the current document and the linked document?",options:["rel","type","href","link"],correct:0,explanation:"rel specifies the relationship between the current document and the linked document."},
+  {id:291,question:"Which `rel` value is used for the CSS file?",options:["stylesheet","css","style","sheet"],correct:0,explanation:"rel='stylesheet' is used for the CSS file."},
+  {id:292,question:"Which `rel` value indicates a canonical URL?",options:["canonical","rel=canonical","url","main"],correct:0,explanation:"rel='canonical' indicates a canonical URL."},
+  {id:293,question:"Which `rel` value indicates a document's license?",options:["license","lcs","lic","copyright"],correct:0,explanation:"rel='license' indicates a document's license."},
+  {id:294,question:"Which `rel` value indicates the next document in a series?",options:["next","forward","continue","follow"],correct:0,explanation:"rel='next' indicates the next document in a series."},
+  {id:295,question:"Which `rel` value indicates the previous document in a series?",options:["prev","previous","back","before"],correct:0,explanation:"rel='prev' indicates the previous document in a series."},
+  {id:296,question:"Which `rel` value is used to link to a translated version of the document?",options:["alternate","translate","lang","version"],correct:0,explanation:"rel='alternate' is used to link to a translated version."},
+  {id:297,question:"Which element is used to embed an external resource (like an iframe) within a document?",options:["&lt;iframe&gt;","&lt;embed&gt;","&lt;object&gt;","&lt;frame&gt;"],correct:0,explanation:"&lt;iframe&gt; embeds an external resource."},
+  {id:298,question:"Which attribute of &lt;iframe&gt; provides the URL of the embedded document?",options:["src","href","url","link"],correct:0,explanation:"src provides the URL of the embedded document."},
+  {id:299,question:"Which attribute of &lt;iframe&gt; is used to specify sandbox restrictions?",options:["sandbox","security","allow","restrict"],correct:0,explanation:"sandbox is used to specify sandbox restrictions."},
+  {id:300,question:"Which attribute of &lt;iframe&gt; allows features (like fullscreen) to be enabled?",options:["allow","permissions","features","grant"],correct:0,explanation:"allow allows features (like fullscreen) to be enabled."}
+  ],
+
+  // BATCH 7: Multimedia
+  [
+  {id:301,question:"Which tag is used to embed video content?",options:["&lt;video&gt;","&lt;audio&gt;","&lt;media&gt;","&lt;embed&gt;"],correct:0,explanation:"&lt;video&gt; is used to embed video content."},
+  {id:302,question:"Which tag is used to embed audio content?",options:["&lt;audio&gt;","&lt;video&gt;","&lt;sound&gt;","&lt;music&gt;"],correct:0,explanation:"&lt;audio&gt; is used to embed audio content."},
+  {id:303,question:"Which attribute adds playback controls to media elements?",options:["controls","autoplay","play","show-controls"],correct:0,explanation:"controls attribute adds playback controls."},
+  {id:304,question:"Which attribute starts media playback automatically?",options:["autoplay","controls","loop","preload"],correct:0,explanation:"autoplay attribute starts media playback automatically."},
+  {id:305,question:"Which attribute repeats media playback indefinitely?",options:["loop","repeat","autoplay","controls"],correct:0,explanation:"loop attribute repeats media playback indefinitely."},
+  {id:306,question:"Which attribute specifies how media should be loaded upon page load?",options:["preload","load","src","autoplay"],correct:0,explanation:"preload specifies how media should be loaded."},
+  {id:307,question:"Which attribute mutes the audio output of the video/audio?",options:["muted","mute","volume=0","silent"],correct:0,explanation:"muted attribute mutes the audio output."},
+  {id:308,question:"Which element specifies alternate media sources for &lt;video&gt; or &lt;audio&gt;?",options:["&lt;source&gt;","&lt;src&gt;","&lt;media&gt;","&lt;track&gt;"],correct:0,explanation:"&lt;source&gt; specifies alternate media sources."},
+  {id:309,question:"Which attribute of &lt;source&gt; specifies the media type?",options:["type","kind","format","media"],correct:0,explanation:"type attribute specifies the media type (e.g., video/mp4)."},
+  {id:310,question:"Which attribute of &lt;source&gt; specifies media query rules?",options:["media","type","query","screen"],correct:0,explanation:"media attribute specifies media query rules."},
+  {id:311,question:"Which element defines text tracks (subtitles, captions) for media?",options:["&lt;track&gt;","&lt;caption&gt;","&lt;subtitle&gt;","&lt;text&gt;"],correct:0,explanation:"&lt;track&gt; defines text tracks."},
+  {id:312,question:"Which attribute of &lt;track&gt; specifies the type of text track?",options:["kind","type","format","label"],correct:0,explanation:"kind attribute specifies the type of text track (captions, subtitles, descriptions)."},
+  {id:313,question:"Which attribute of &lt;track&gt; specifies the language of the track?",options:["srclang","lang","src-lang","language"],correct:0,explanation:"srclang specifies the language of the track."},
+  {id:314,question:"Which attribute specifies an image to be shown before the video starts?",options:["poster","preview","thumbnail","image"],correct:0,explanation:"poster attribute specifies an image to be shown before the video starts."},
+  {id:315,question:"The recommended format for video content in HTML5 is:",options:["MP4 (H.264 + AAC)","AVI","WMV","FLV"],correct:0,explanation:"MP4 (H.264 + AAC) is widely supported."},
+  {id:316,question:"The recommended format for audio content in HTML5 is:",options:["MP3 (MPEG-1 Audio Layer 3)","WAV","WMA","MIDI"],correct:0,explanation:"MP3 is widely supported."},
+  {id:317,question:"Which attribute is used to define an embed point for an external application/plugin?",options:["&lt;embed&gt;","&lt;object&gt;","&lt;applet&gt;","&lt;plugin&gt;"],correct:0,explanation:"&lt;embed&gt; defines an embed point."},
+  {id:318,question:"Which tag is the standard way to embed external content, including Flash and Java applets?",options:["&lt;object&gt;","&lt;embed&gt;","&lt;plugin&gt;","&lt;param&gt;"],correct:0,explanation:"&lt;object&gt; is the standard way to embed external content."},
+  {id:319,question:"Which tag is used to define parameters for an &lt;object&gt; element?",options:["&lt;param&gt;","&lt;parameter&gt;","&lt;value&gt;","&lt;option&gt;"],correct:0,explanation:"&lt;param&gt; defines parameters for an &lt;object&gt; element."},
+  {id:320,question:"Which tag is used to create an inline frame for embedding another document?",options:["&lt;iframe&gt;","&lt;frame&gt;","&lt;frameset&gt;","&lt;embed&gt;"],correct:0,explanation:"&lt;iframe&gt; creates an inline frame."},
+  {id:321,question:"Which attribute of &lt;iframe&gt; allows content to be displayed without a border?",options:["frameborder='0'","border='none'","no-frame","noborder"],correct:0,explanation:"frameborder='0' (deprecated, use CSS border: none;)."},
+  {id:322,question:"Which attribute of &lt;iframe&gt; is used to prevent the frame content from being scripted?",options:["sandbox","allow-script","security","no-script"],correct:0,explanation:"sandbox attribute without allow-scripts prevents scripting."},
+  {id:323,question:"Which HTML5 element is used to group different image sources for different screen sizes/resolutions?",options:["&lt;picture&gt;","&lt;img&gt;","&lt;source&gt;","&lt;media&gt;"],correct:0,explanation:"&lt;picture&gt; groups different image sources."},
+  {id:324,question:"Which attribute of &lt;source&gt; (inside &lt;picture&gt;) specifies the media query for the image?",options:["media","srcset","size","type"],correct:0,explanation:"media attribute specifies the media query."},
+  {id:325,question:"Which attribute of &lt;source&gt; (inside &lt;picture&gt;) specifies a list of image files and their sizes?",options:["srcset","src","source-set","size-set"],correct:0,explanation:"srcset specifies a list of image files and their sizes."},
+  {id:326,question:"The &lt;img&gt; tag inside &lt;picture&gt; acts as a:",options:["Fallback mechanism.","Primary source.","Caption.","Placeholder."],correct:0,explanation:"Fallback mechanism (if no &lt;source&gt; matches)."},
+  {id:327,question:"Which attribute is used to define an image map?",options:["usemap","map","ismap","imagemap"],correct:0,explanation:"usemap attribute defines an image map."},
+  {id:328,question:"Which tag defines the client-side image map?",options:["&lt;map&gt;","&lt;area&gt;","&lt;imagemap&gt;","&lt;usemap&gt;"],correct:0,explanation:"&lt;map&gt; defines the client-side image map."},
+  {id:329,question:"Which tag defines a clickable area inside an image map?",options:["&lt;area&gt;","&lt;map-area&gt;","&lt;click-area&gt;","&lt;region&gt;"],correct:0,explanation:"&lt;area&gt; defines a clickable area inside an image map."},
+  {id:330,question:"Which attribute of &lt;area&gt; specifies the coordinates of the clickable area?",options:["coords","coordinates","shape","href"],correct:0,explanation:"coords specifies the coordinates of the clickable area."},
+  {id:331,question:"Which attribute of &lt;area&gt; specifies the shape of the clickable area?",options:["shape","type","format","coords"],correct:0,explanation:"shape attribute specifies the shape (rect, circle, poly)."},
+  {id:332,question:"The `ismap` attribute on &lt;img&gt; indicates a:",options:["Server-side image map.","Client-side image map.","Responsive image.","Clickable image."],correct:0,explanation:"Server-side image map."},
+  {id:333,question:"Which attribute is used to specify the initial state of the &lt;details&gt; element?",options:["open","closed","state","default"],correct:0,explanation:"open attribute specifies the initial state (expanded/collapsed)."},
+  {id:334,question:"Which attribute specifies that an element can accept multiple drag and drop files?",options:["multiple","draggable","accept","allow"],correct:0,explanation:"multiple (on input type='file') allows multiple files."},
+  {id:335,question:"Which element is used to insert a custom list of words that can be used to constrain input?",options:["&lt;datalist&gt;","&lt;list&gt;","&lt;options&gt;","&lt;select&gt;"],correct:0,explanation:"&lt;datalist&gt; inserts a custom list of words."},
+  {id:336,question:"Which tag is used to create a short, simple pop-up window or dialog box?",options:["&lt;dialog&gt;","&lt;modal&gt;","&lt;popup&gt;","&lt;window&gt;"],correct:0,explanation:"&lt;dialog&gt; creates a short, simple pop-up window or dialog box."},
+  {id:337,question:"Which method is used in JavaScript to show a non-modal &lt;dialog&gt;?",options:["dialog.show()","dialog.open()","dialog.display()","dialog.showModal()"],correct:0,explanation:"dialog.show() shows a non-modal &lt;dialog&gt;."},
+  {id:338,question:"Which method is used in JavaScript to show a modal &lt;dialog&gt;?",options:["dialog.showModal()","dialog.show()","dialog.modal()","dialog.openModal()"],correct:0,explanation:"dialog.showModal() shows a modal &lt;dialog&gt;."},
+  {id:339,question:"Which attribute of &lt;dialog&gt; is present when the dialog is active?",options:["open","active","visible","display"],correct:0,explanation:"open attribute is present when the dialog is active."},
+  {id:340,question:"Which element is used for marking a block of flow content (like a code snippet) as a self-contained unit?",options:["&lt;figure&gt;","&lt;article&gt;","&lt;section&gt;","&lt;div&gt;"],correct:0,explanation:"&lt;figure&gt; is used for marking a block of flow content as a self-contained unit."},
+  {id:341,question:"Which attribute is used to specify a unique, machine-readable format for the content inside &lt;time&gt;?",options:["datetime","date","time","format"],correct:0,explanation:"datetime attribute is used to specify a unique, machine-readable format for the content inside &lt;time&gt;."},
+  {id:342,question:"Which attribute is used to define the high value for the &lt;meter&gt; element?",options:["high","max","optimum","upper"],correct:0,explanation:"high attribute defines the high value for the &lt;meter&gt; element."},
+  {id:343,question:"Which attribute is used to define the low value for the &lt;meter&gt; element?",options:["low","min","optimum","lower"],correct:0,explanation:"low attribute defines the low value for the &lt;meter&gt; element."},
+  {id:344,question:"Which attribute is used to define the optimal value for the &lt;meter&gt; element?",options:["optimum","optimal","value","best"],correct:0,explanation:"optimum attribute defines the optimal value for the &lt;meter&gt; element."},
+  {id:345,question:"Which attribute of &lt;progress&gt; specifies the amount of work completed?",options:["value","max","progress","completed"],correct:0,explanation:"value attribute specifies the amount of work completed."},
+  {id:346,question:"Which attribute of &lt;progress&gt; specifies the total amount of work?",options:["max","value","total","full"],correct:0,explanation:"max attribute specifies the total amount of work."},
+  {id:347,question:"Which attribute is used to group related input elements in a &lt;form&gt;?",options:["form","fieldset","name","group"],correct:0,explanation:"form attribute is used to group related input elements in a &lt;form&gt;."},
+  {id:348,question:"Which tag is used for defining a description or explanatory term?",options:["&lt;dfn&gt;","&lt;abbr&gt;","&lt;var&gt;","&lt;code&gt;"],correct:0,explanation:"&lt;dfn&gt; is used for defining a description or explanatory term."},
+  {id:349,question:"Which tag is used to mark text that has been inserted into a document?",options:["&lt;ins&gt;","&lt;added&gt;","&lt;new&gt;","&lt;u&gt;"],correct:0,explanation:"&lt;ins&gt; marks text that has been inserted."},
+  {id:350,question:"Which tag is used to mark text that has been deleted from a document?",options:["&lt;del&gt;","&lt;s&gt;","&lt;strike&gt;","&lt;remove&gt;"],correct:0,explanation:"&lt;del&gt; marks text that has been deleted."}
+  ],
+
+  // BATCH 8: Graphics &amp; Canvas
+  [
+  {id:351,question:"Which element is used to draw graphics on the fly via JavaScript?",options:["&lt;canvas&gt;","&lt;svg&gt;","&lt;draw&gt;","&lt;graphic&gt;"],correct:0,explanation:"&lt;canvas&gt; is used to draw graphics on the fly via JavaScript."},
+  {id:352,question:"Which method is used to get the drawing context of a canvas?",options:["getContext()","getCanvas()","getDraw()","getGraphics()"],correct:0,explanation:"getContext() is used to get the drawing context."},
+  {id:353,question:"The default context type for 2D drawing on canvas is:",options:["2d","3d","webgl","draw"],correct:0,explanation:"The default context type for 2D drawing is '2d'."},
+  {id:354,question:"Which canvas method starts a new path?",options:["beginPath()","startPath()","newPath()","drawPath()"],correct:0,explanation:"beginPath() starts a new path."},
+  {id:355,question:"Which canvas method draws the current path?",options:["stroke()","fill()","draw()","path()"],correct:0,explanation:"stroke() draws the current path."},
+  {id:356,question:"Which canvas method fills the current path?",options:["fill()","stroke()","draw()","path()"],correct:0,explanation:"fill() fills the current path."},
+  {id:357,question:"Which canvas property sets the color of the shape's outline?",options:["strokeStyle","fillStyle","lineColor","borderColor"],correct:0,explanation:"strokeStyle sets the color of the shape's outline."},
+  {id:358,question:"Which canvas property sets the color of the shape's inner area?",options:["fillStyle","strokeStyle","fillColor","backgroundColor"],correct:0,explanation:"fillStyle sets the color of the shape's inner area."},
+  {id:359,question:"Which canvas method is used to draw text?",options:["fillText()","strokeText()","drawText()","text()"],correct:0,explanation:"fillText() draws solid text."},
+  {id:360,question:"Which canvas method is used to draw a line?",options:["lineTo()","drawLine()","pathLine()","createLine()"],correct:0,explanation:"lineTo() draws a line to a point."},
+  {id:361,question:"Which element is used to define vector-based graphics in XML format?",options:["&lt;svg&gt;","&lt;canvas&gt;","&lt;vector&gt;","&lt;graphic&gt;"],correct:0,explanation:"&lt;svg&gt; is used to define vector-based graphics."},
+  {id:362,question:"SVG stands for:",options:["Scalable Vector Graphics","Simple Vector Graphics","Standard Vector Graph","Structured Vector Geometry"],correct:0,explanation:"SVG stands for Scalable Vector Graphics."},
+  {id:363,question:"Which SVG element is used to draw a circle?",options:["&lt;circle&gt;","&lt;rect&gt;","&lt;line&gt;","&lt;path&gt;"],correct:0,explanation:"&lt;circle&gt; is used to draw a circle."},
+  {id:364,question:"Which SVG element is used to draw a rectangle?",options:["&lt;rect&gt;","&lt;circle&gt;","&lt;line&gt;","&lt;path&gt;"],correct:0,explanation:"&lt;rect&gt; is used to draw a rectangle."},
+  {id:365,question:"Which SVG element is used to draw a line?",options:["&lt;line&gt;","&lt;polyline&gt;","&lt;path&gt;","&lt;stroke&gt;"],correct:0,explanation:"&lt;line&gt; is used to draw a line."},
+  {id:366,question:"Which SVG element is used to define a custom path?",options:["&lt;path&gt;","&lt;line&gt;","&lt;curve&gt;","&lt;polyline&gt;"],correct:0,explanation:"&lt;path&gt; is used to define a custom path."},
+  {id:367,question:"Which attribute specifies the outline color of an SVG shape?",options:["stroke","fill","color","outline"],correct:0,explanation:"stroke attribute specifies the outline color."},
+  {id:368,question:"Which attribute specifies the fill color of an SVG shape?",options:["fill","stroke","color","background"],correct:0,explanation:"fill attribute specifies the fill color."},
+  {id:369,question:"The key difference between Canvas and SVG is:",options:["Canvas is pixel-based, SVG is vector-based.","Canvas is drawn by JS, SVG is drawn by CSS.","Canvas is static, SVG is dynamic.","Canvas is 3D, SVG is 2D."],correct:0,explanation:"Canvas is raster/pixel-based, SVG is vector-based."},
+  {id:370,question:"Which HTML element is used to provide an alternative for users whose browser does not support canvas?",options:["Content between &lt;canvas&gt; tags.","&lt;div&gt; with a fallback message.","&lt;noscript&gt;","&lt;p&gt; with a fallback message."],correct:0,explanation:"Content between &lt;canvas&gt; tags is displayed if the browser does not support it."},
+  {id:371,question:"Which attribute of &lt;canvas&gt; sets the initial height?",options:["height","size","rows","vertical"],correct:0,explanation:"height attribute sets the initial height."},
+  {id:372,question:"Which attribute of &lt;canvas&gt; sets the initial width?",options:["width","size","cols","horizontal"],correct:0,explanation:"width attribute sets the initial width."},
+  {id:373,question:"Which canvas method saves the current canvas state?",options:["save()","restore()","push()","pop()"],correct:0,explanation:"save() saves the current canvas state."},
+  {id:374,question:"Which canvas method restores the most recently saved canvas state?",options:["restore()","save()","pop()","undo()"],correct:0,explanation:"restore() restores the most recently saved canvas state."},
+  {id:375,question:"Which canvas method is used to draw a rectangle?",options:["fillRect()","strokeRect()","drawRect()","rect()"],correct:0,explanation:"fillRect() fills a rectangle."},
+  {id:376,question:"Which canvas method is used to clear a specified rectangular area?",options:["clearRect()","clear()","resetRect()","eraseRect()"],correct:0,explanation:"clearRect() clears a specified rectangular area."},
+  {id:377,question:"Which canvas method is used to rotate the drawing context?",options:["rotate()","transform()","turn()","spin()"],correct:0,explanation:"rotate() rotates the drawing context."},
+  {id:378,question:"Which canvas method is used to move the starting point of a path?",options:["moveTo()","lineTo()","startPath()","begin()"],correct:0,explanation:"moveTo() moves the starting point of a path."},
+  {id:379,question:"Which canvas property sets the line width?",options:["lineWidth","strokeStyle","lineSize","strokeWidth"],correct:0,explanation:"lineWidth sets the line width."},
+  {id:380,question:"Which canvas property sets the type of end caps on a line?",options:["lineCap","lineJoin","endCap","cap"],correct:0,explanation:"lineCap sets the type of end caps on a line."},
+  {id:381,question:"Which SVG element is used to draw text?",options:["&lt;text&gt;","&lt;tspan&gt;","&lt;drawtext&gt;","&lt;svgtext&gt;"],correct:0,explanation:"&lt;text&gt; is used to draw text."},
+  {id:382,question:"Which SVG element is used to define an ellipse?",options:["&lt;ellipse&gt;","&lt;circle&gt;","&lt;oval&gt;","&lt;path&gt;"],correct:0,explanation:"&lt;ellipse&gt; is used to define an ellipse."},
+  {id:383,question:"Which SVG element is used to define a polygon?",options:["&lt;polygon&gt;","&lt;polyline&gt;","&lt;shape&gt;","&lt;path&gt;"],correct:0,explanation:"&lt;polygon&gt; is used to define a polygon."},
+  {id:384,question:"Which SVG attribute specifies the width of the stroke?",options:["stroke-width","line-width","stroke-size","width"],correct:0,explanation:"stroke-width specifies the width of the stroke."},
+  {id:385,question:"Which SVG attribute specifies the opacity of the fill color?",options:["fill-opacity","opacity","stroke-opacity","alpha"],correct:0,explanation:"fill-opacity specifies the opacity of the fill color."},
+  {id:386,question:"Which SVG element is used to define reusable graphics objects?",options:["&lt;defs&gt;","&lt;g&gt;","&lt;use&gt;","&lt;group&gt;"],correct:0,explanation:"&lt;defs&gt; defines reusable graphics objects."},
+  {id:387,question:"Which SVG element is used to group other SVG elements?",options:["&lt;g&gt;","&lt;group&gt;","&lt;defs&gt;","&lt;svg&gt;"],correct:0,explanation:"&lt;g&gt; is used to group other SVG elements."},
+  {id:388,question:"Which SVG element is used to reuse an element defined elsewhere?",options:["&lt;use&gt;","&lt;link&gt;","&lt;ref&gt;","&lt;instance&gt;"],correct:0,explanation:"&lt;use&gt; is used to reuse an element defined elsewhere."},
+  {id:389,question:"Which element is used to define a link/anchor in SVG?",options:["&lt;a&gt;","&lt;link&gt;","&lt;href&gt;","&lt;anchor&gt;"],correct:0,explanation:"&lt;a&gt; is used to define a link/anchor in SVG."},
+  {id:390,question:"Which SVG attribute specifies the coordinates for a line's start point?",options:["x1, y1","x, y","startx, starty","x-start, y-start"],correct:0,explanation:"x1, y1 specifies the coordinates for a line's start point."},
+  {id:391,question:"Which SVG attribute specifies the coordinates for a line's end point?",options:["x2, y2","endx, endy","x-end, y-end","x, y"],correct:0,explanation:"x2, y2 specifies the coordinates for a line's end point."},
+  {id:392,question:"Which element is used to embed an SVG file directly into an HTML document?",options:["&lt;img&gt; with src='file.svg'","&lt;embed&gt;","&lt;object&gt;","All of the above"],correct:3,explanation:"All of the above can be used to embed an SVG file."},
+  {id:393,question:"Which HTML element is the most semantic for displaying an independent image with a caption?",options:["&lt;figure&gt; &lt;img&gt; &lt;figcaption&gt;","&lt;div&gt; &lt;img&gt; &lt;p&gt;","&lt;section&gt; &lt;img&gt; &lt;p&gt;","&lt;img&gt; with a title attribute"],correct:0,explanation:"&lt;figure&gt; with &lt;img&gt; and &lt;figcaption&gt; is the most semantic."},
+  {id:394,question:"Which attribute is used to provide alternative text for an SVG element?",options:["aria-label","alt","title","description"],correct:0,explanation:"aria-label is often used, or &lt;title&gt;/&lt;desc&gt; elements inside the SVG."},
+  {id:395,question:"Which element is used to define a clipping path in SVG?",options:["&lt;clipPath&gt;","&lt;mask&gt;","&lt;path&gt;","&lt;g&gt;"],correct:0,explanation:"&lt;clipPath&gt; defines a clipping path in SVG."},
+  {id:396,question:"Which element is used to define a mask in SVG?",options:["&lt;mask&gt;","&lt;clipPath&gt;","&lt;filter&gt;","&lt;g&gt;"],correct:0,explanation:"&lt;mask&gt; defines a mask in SVG."},
+  {id:397,question:"Which CSS property can be used to transform a canvas element (e.g., rotate it)?",options:["transform","rotate","canvas-transform","context-transform"],correct:0,explanation:"transform CSS property can be used to transform the entire canvas element."},
+  {id:398,question:"Which HTML tag is used to create a simple popup/modal element?",options:["&lt;dialog&gt;","&lt;modal&gt;","&lt;popup&gt;","&lt;div&gt;"],correct:0,explanation:"&lt;dialog&gt; is used to create a simple popup/modal element."},
+  {id:399,question:"Which tag is used to embed a separate document within the current HTML document?",options:["&lt;iframe&gt;","&lt;frame&gt;","&lt;embed&gt;","&lt;object&gt;"],correct:0,explanation:"&lt;iframe&gt; is used to embed a separate document."},
+  {id:400,question:"Which attribute of &lt;iframe&gt; is used to specify the name of the frame?",options:["name","id","title","src"],correct:0,explanation:"name attribute is used to specify the name of the frame (for linking or targeting)."}
+  ],
+
+  // BATCH 9: APIs &amp; Storage
+  [
+  {id:401,question:"Which HTML5 API allows applications to store data locally within the user's browser?",options:["Web Storage API","Web SQL API","IndexedDB API","Web Cache API"],correct:0,explanation:"Web Storage API (localStorage and sessionStorage) allows applications to store data locally."},
+  {id:402,question:"Which storage object stores data with no expiration date?",options:["localStorage","sessionStorage","cookie","applicationStorage"],correct:0,explanation:"localStorage stores data with no expiration date."},
+  {id:403,question:"Which storage object stores data only for the current session?",options:["sessionStorage","localStorage","cookie","browserStorage"],correct:0,explanation:"sessionStorage stores data only for the current session."},
+  {id:404,question:"Which JavaScript method is used to store data in localStorage?",options:["localStorage.setItem()","localStorage.save()","localStorage.add()","localStorage.set()"],correct:0,explanation:"localStorage.setItem() is used to store data."},
+  {id:405,question:"Which JavaScript method is used to retrieve data from sessionStorage?",options:["sessionStorage.getItem()","sessionStorage.retrieve()","sessionStorage.get()","sessionStorage.load()"],correct:0,explanation:"sessionStorage.getItem() is used to retrieve data."},
+  {id:406,question:"What data type is typically used to store objects in Web Storage?",options:["JSON strings","JavaScript objects","XML strings","HTML strings"],correct:0,explanation:"JSON strings (since Web Storage only stores strings)."},
+  {id:407,question:"Which HTML5 API allows for drag-and-drop functionality?",options:["Drag and Drop API","HTML DOM API","Events API","User Interface API"],correct:0,explanation:"Drag and Drop API allows for drag-and-drop functionality."},
+  {id:408,question:"Which attribute specifies that an element is draggable?",options:["draggable='true'","drag='on'","allow-drag","can-drag"],correct:0,explanation:"draggable='true' specifies that an element is draggable."},
+  {id:409,question:"Which event fires when the dragged element enters a valid drop target?",options:["dragenter","dragover","drop","dragstart"],correct:0,explanation:"dragenter fires when the dragged element enters a valid drop target."},
+  {id:410,question:"Which event must be prevented in the drop zone to allow a drop?",options:["dragover","dragenter","drop","dragstart"],correct:0,explanation:"The default behavior of dragover must be prevented to allow a drop."},
+  {id:411,question:"Which HTML5 API provides access to the user's current location?",options:["Geolocation API","Location API","GPS API","Navigator API"],correct:0,explanation:"Geolocation API provides access to the user's current location."},
+  {id:412,question:"Which JavaScript method is used to get the user's current position (one-time)?",options:["getCurrentPosition()","watchPosition()","getPosition()","getCoords()"],correct:0,explanation:"getCurrentPosition() gets the user's current position (one-time)."},
+  {id:413,question:"Which JavaScript method is used to continuously watch the user's position?",options:["watchPosition()","getCurrentPosition()","trackPosition()","livePosition()"],correct:0,explanation:"watchPosition() continuously watches the user's position."},
+  {id:414,question:"Which HTML5 API allows an application to run offline?",options:["Application Cache (AppCache)","Web Storage","Web Worker","IndexedDB"],correct:0,explanation:"Application Cache (AppCache) allows an application to run offline (though now deprecated)."},
+  {id:415,question:"What file type is required for Application Cache?",options:["Manifest file (.appcache)","Cache file (.cache)","Storage file (.storage)","Offline file (.offline)"],correct:0,explanation:"Manifest file (.appcache) is required."},
+  {id:416,question:"Which API allows background tasks to run without interfering with the main thread?",options:["Web Workers API","Background API","Threads API","Worker Pool API"],correct:0,explanation:"Web Workers API allows background tasks to run."},
+  {id:417,question:"What method is used to send data from the main script to a Web Worker?",options:["postMessage()","sendMessage()","passData()","transfer()"],correct:0,explanation:"postMessage() is used to send data."},
+  {id:418,question:"Which event is used to receive data from a Web Worker?",options:["onmessage","onreceive","ondata","onload"],correct:0,explanation:"onmessage event is used to receive data."},
+  {id:419,question:"Which HTML5 feature enables full-screen mode for an element?",options:["Fullscreen API","screen-mode","viewport","monitor"],correct:0,explanation:"Fullscreen API enables full-screen mode."},
+  {id:420,question:"Which method requests that an element be displayed in full-screen mode?",options:["requestFullscreen()","goFullscreen()","enterFullscreen()","toggleFullscreen()"],correct:0,explanation:"requestFullscreen() requests full-screen mode."},
+  {id:421,question:"Which property is used to check if the browser supports the Fullscreen API?",options:["document.fullscreenEnabled","document.isFullScreen","document.fullscreenSupport","document.allowFullscreen"],correct:0,explanation:"document.fullscreenEnabled is used to check for support."},
+  {id:422,question:"Which HTML5 feature allows a website to send notifications to the user?",options:["Notification API","Alert API","Popup API","Web Message API"],correct:0,explanation:"Notification API allows a website to send notifications."},
+  {id:423,question:"Which method is used to ask the user for permission to display notifications?",options:["Notification.requestPermission()","Notification.allow()","Notification.ask()","Notification.permission()"],correct:0,explanation:"Notification.requestPermission() asks for permission."},
+  {id:424,question:"Which HTML5 API allows for client-side editing of files?",options:["File API","FileReader API","FileEditor API","Blob API"],correct:0,explanation:"File API (including FileReader) allows for client-side editing of files."},
+  {id:425,question:"Which object is used in JavaScript to read the contents of a file?",options:["FileReader","FileEditor","BlobReader","FileLoader"],correct:0,explanation:"FileReader object is used to read the contents of a file."},
+  {id:426,question:"Which method of FileReader is used to read the file as a text string?",options:["readAsText()","readAsString()","readText()","read()"],correct:0,explanation:"readAsText() is used to read the file as a text string."},
+  {id:427,question:"Which element can be used as an initial source for a Web Worker?",options:["&lt;script&gt; with type='worker'","&lt;worker&gt; tag","&lt;iframe&gt;","&lt;template&gt;"],correct:0,explanation:"&lt;script&gt; with type='worker' (or directly using a JS file)."},
+  {id:428,question:"Which Web Storage method removes a specific key-value pair?",options:["removeItem()","deleteItem()","remove()","clearItem()"],correct:0,explanation:"removeItem() removes a specific key-value pair."},
+  {id:429,question:"Which Web Storage method removes all key-value pairs?",options:["clear()","removeAll()","reset()","delete()"],correct:0,explanation:"clear() removes all key-value pairs."},
+  {id:430,question:"The data passed via `postMessage` to a Web Worker is copied, not shared. What is this called?",options:["Structured clone algorithm","Deep copy","Object serialization","Data transfer"],correct:0,explanation:"Structured clone algorithm is used to copy the data."},
+  {id:431,question:"Which attribute of &lt;iframe&gt; is used for seamless integration without scrollbars (deprecated)?",options:["seamless","no-scroll","autosize","borderless"],correct:0,explanation:"seamless (deprecated in favor of CSS)."},
+  {id:432,question:"The `deviceorientation` event is part of which API?",options:["Device Orientation API","Geolocation API","Sensor API","Motion API"],correct:0,explanation:"Device Orientation API."},
+  {id:433,question:"The `devicemotion` event is part of which API?",options:["Device Motion API","Sensor API","Gyroscope API","Events API"],correct:0,explanation:"Device Motion API."},
+  {id:434,question:"Which API is the modern, non-relational database alternative to Web SQL?",options:["IndexedDB API","Web Storage API","Web Worker API","File API"],correct:0,explanation:"IndexedDB API is the modern alternative to Web SQL."},
+  {id:435,question:"Which API enables two documents to communicate with each other regardless of their origin?",options:["Web Messaging API (postMessage)","Web Sockets API","Web RTC API","Fetch API"],correct:0,explanation:"Web Messaging API (postMessage) enables cross-origin communication."},
+  {id:436,question:"Which HTML5 element is used for real-time video, audio, and data communication?",options:["WebRTC","&lt;stream&gt;","&lt;peer&gt;","&lt;video&gt;"],correct:0,explanation:"WebRTC is the technology, though it uses &lt;video&gt; and JavaScript APIs."},
+  {id:437,question:"Which object is key for accessing camera/microphone in WebRTC?",options:["navigator.mediaDevices","navigator.media","navigator.devices","navigator.camera"],correct:0,explanation:"navigator.mediaDevices (getUserMedia)."},
+  {id:438,question:"Which attribute of &lt;a&gt; is used to download the linked resource instead of navigating to it?",options:["download","get","save","target"],correct:0,explanation:"download attribute forces a download."},
+  {id:439,question:"Which attribute of &lt;a&gt; is used to provide a list of URLs to ping when the link is clicked?",options:["ping","track","notify","send"],correct:0,explanation:"ping attribute provides a list of URLs to ping."},
+  {id:440,question:"Which value of the `preload` attribute suggests that the browser should load only metadata?",options:["metadata","none","auto","lazy"],correct:0,explanation:"preload='metadata' suggests loading only metadata."},
+  {id:441,question:"Which value of the `preload` attribute suggests that the browser should load the entire file?",options:["auto","all","full","load"],correct:0,explanation:"preload='auto' suggests loading the entire file."},
+  {id:442,question:"Which attribute of &lt;video&gt; can be used to display an image before the video is played?",options:["poster","preview","fallback","img"],correct:0,explanation:"poster attribute displays an image before the video is played."},
+  {id:443,question:"What is the maximum storage size for localStorage (typically)?",options:["5-10MB","1MB","50KB","Unlimited"],correct:0,explanation:"5-10MB (varies by browser)."},
+  {id:444,question:"Which type of Web Worker has limited functionality and is tied to a specific document?",options:["Shared Worker","Dedicated Worker","Service Worker","Local Worker"],correct:0,explanation:"Dedicated Worker."},
+  {id:445,question:"Which type of Web Worker can be accessed by multiple scripts from different windows, tabs, or iframes?",options:["Shared Worker","Dedicated Worker","Service Worker","Global Worker"],correct:0,explanation:"Shared Worker."},
+  {id:446,question:"Which type of Worker is primarily used for handling network requests, caching, and offline experiences?",options:["Service Worker","Shared Worker","Dedicated Worker","Network Worker"],correct:0,explanation:"Service Worker."},
+  {id:447,question:"Service Workers rely on which Web API for intercepting and handling network requests?",options:["Fetch API","XMLHttpRequest","ServiceWorker API","Network API"],correct:0,explanation:"Fetch API."},
+  {id:448,question:"Which HTML5 feature enables websites to react to device orientation and motion events?",options:["Device Sensors API","Mobile API","Events API","Touch Events API"],correct:0,explanation:"Device Sensors API (e.g., DeviceOrientationEvent)."},
+  {id:449,question:"Which attribute is used to make an &lt;a&gt; element only accessible to the keyboard?",options:["tabindex","accesskey","href","role"],correct:0,explanation:"tabindex='0' or higher makes it accessible by keyboard."},
+  {id:450,question:"Which HTML5 feature is replacing AppCache for offline functionality?",options:["Service Workers","Web Storage","Web SQL","IndexedDB"],correct:0,explanation:"Service Workers."}
+  ],
+
+  // BATCH 10: Advanced Topics
+  [
+  {id:451,question:"Which character set is recommended for HTML5?",options:["UTF-8","ISO-8859-1","ASCII","Unicode"],correct:0,explanation:"UTF-8 is the recommended character set for HTML5."},
+  {id:452,question:"What is the correct DOCTYPE declaration for HTML5?",options:["&lt;!DOCTYPE html&gt;","&lt;!DOCTYPE HTML PUBLIC ...&gt;","&lt;!DOCTYPE HTML5&gt;","&lt;!DOCTYPE html PUBLIC&gt;"],correct:0,explanation:"&lt;!DOCTYPE html&gt; is the correct declaration."},
+  {id:453,question:"Which element is used for backward compatibility in the head section?",options:["&lt;meta http-equiv='X-UA-Compatible'&gt;","&lt;compatibility&gt;","&lt;fallback&gt;","&lt;link rel='old-browser'&gt;"],correct:0,explanation:"&lt;meta http-equiv='X-UA-Compatible'&gt; is used for backward compatibility."},
+  {id:454,question:"Which attribute is used to define microdata/structured data properties?",options:["itemprop","itemscope","itemtype","data-prop"],correct:0,explanation:"itemprop is used to define microdata/structured data properties."},
+  {id:455,question:"Which attribute specifies the vocabulary (schema) for microdata?",options:["itemtype","itemprop","itemscope","vocab"],correct:0,explanation:"itemtype specifies the vocabulary (schema) for microdata."},
+  {id:456,question:"Which attribute specifies the scope of the microdata/structured data item?",options:["itemscope","itemtype","itemprop","data-scope"],correct:0,explanation:"itemscope specifies the scope of the microdata/structured data item."},
+  {id:457,question:"Which tag is used to define a mathematical expression?",options:["&lt;math&gt;","&lt;equation&gt;","&lt;formula&gt;","&lt;expression&gt;"],correct:0,explanation:"&lt;math&gt; tag (MathML) is used to define a mathematical expression."},
+  {id:458,question:"What does ARIA stand for?",options:["Accessible Rich Internet Applications","Advanced Rich Internet Access","Application Rendering Interface Access","Accessible Resource Indexing Agent"],correct:0,explanation:"ARIA stands for Accessible Rich Internet Applications."},
+  {id:459,question:"Which ARIA attribute is used to define an element's role?",options:["role","aria-role","type","element"],correct:0,explanation:"role attribute is used to define an element's role."},
+  {id:460,question:"Which ARIA attribute is used to indicate an element's current state (e.g., checked, disabled)?",options:["aria-checked","aria-state","aria-disabled","aria-current"],correct:0,explanation:"aria-checked (or other aria-attributes) are used to indicate an element's current state."},
+  {id:461,question:"Which ARIA attribute is used to label an element when no visible label is present?",options:["aria-label","aria-title","aria-text","aria-name"],correct:0,explanation:"aria-label is used to label an element."},
+  {id:462,question:"Which ARIA attribute is used to provide a description for an element?",options:["aria-describedby","aria-desc","aria-detail","aria-info"],correct:0,explanation:"aria-describedby is used to provide a description."},
+  {id:463,question:"Which attribute is used to make an element focusable and part of the tab sequence?",options:["tabindex","accesskey","focus","order"],correct:0,explanation:"tabindex attribute makes an element focusable."},
+  {id:464,question:"A negative `tabindex` value (-1) means:",options:["The element is focusable but not in the tab sequence.","The element is focusable and in the tab sequence.","The element is disabled.","The element is hidden."],correct:0,explanation:"The element is focusable but not in the tab sequence."},
+  {id:465,question:"Which HTML feature allows the browser to pre-fetch, pre-render, or pre-connect resources?",options:["Resource Hints","Preload API","Cache API","Fetch API"],correct:0,explanation:"Resource Hints (e.g., &lt;link rel='preload'&gt;, &lt;link rel='preconnect'&gt;)."},
+  {id:466,question:"Which `rel` value is used to instruct the browser to pre-fetch a resource for future navigation?",options:["prefetch","preload","prerender","preconnect"],correct:0,explanation:"&lt;link rel='prefetch'&gt; instructs the browser to pre-fetch a resource."},
+  {id:467,question:"Which `rel` value is used to instruct the browser to download a resource in the current session?",options:["preload","prefetch","prerender","preconnect"],correct:0,explanation:"&lt;link rel='preload'&gt; instructs the browser to download a resource in the current session."},
+  {id:468,question:"Which `rel` value instructs the browser to perform DNS lookup and TCP handshake in advance?",options:["preconnect","prefetch","preload","prerender"],correct:0,explanation:"&lt;link rel='preconnect'&gt; instructs the browser to perform DNS lookup and TCP handshake in advance."},
+  {id:469,question:"Which `rel` value instructs the browser to render the page in the background (full page)?",options:["prerender","preload","prefetch","preconnect"],correct:0,explanation:"&lt;link rel='prerender'&gt; instructs the browser to render the page in the background."},
+  {id:470,question:"What is the purpose of the `nonce` attribute in a script tag?",options:["To prevent Cross-Site Scripting (XSS) attacks.","To enable cache control.","To allow external access.","To specify the script language."],correct:0,explanation:"To prevent Cross-Site Scripting (XSS) attacks (Content Security Policy)."},
+  {id:471,question:"Which attribute is used to provide subresource integrity (SRI) for a script or link?",options:["integrity","hash","check","security"],correct:0,explanation:"integrity attribute is used to provide subresource integrity (SRI)."},
+  {id:472,question:"Which attribute of the &lt;script&gt; tag ensures the script is executed after the page has finished parsing?",options:["defer","async","sync","load"],correct:0,explanation:"defer ensures the script is executed after the page has finished parsing."},
+  {id:473,question:"Which attribute of the &lt;script&gt; tag ensures the script is executed as soon as it is available, without blocking page parsing?",options:["async","defer","sync","parallel"],correct:0,explanation:"async ensures the script is executed as soon as it is available."},
+  {id:474,question:"What is the default behavior of a script tag without `defer` or `async`?",options:["Blocking (pauses HTML parsing)","Non-blocking","Executed after parsing","Executed in parallel"],correct:0,explanation:"Blocking (pauses HTML parsing) is the default behavior."},
+  {id:475,question:"Which attribute of &lt;link&gt; is used to specify the MIME type of a linked resource?",options:["type","media","format","rel"],correct:0,explanation:"type attribute is used to specify the MIME type."},
+  {id:476,question:"Which attribute of &lt;link&gt; is used to specify which media the linked resource applies to?",options:["media","type","rel","screen"],correct:0,explanation:"media attribute is used to specify which media the linked resource applies to."},
+  {id:477,question:"Which HTML element is used to define an important text in a different voice or quality?",options:["&lt;i&gt;","&lt;em&gt;","&lt;dfn&gt;","&lt;var&gt;"],correct:0,explanation:"&lt;i&gt; is used to define an important text in a different voice or quality (e.g., technical term, phrase from another language)."},
+  {id:478,question:"The use of framesets is:",options:["Deprecated in HTML5.","Required for complex layouts.","Used for responsive design.","Preferred over &lt;iframe&gt;."],correct:0,explanation:"Framesets are deprecated in HTML5."},
+  {id:479,question:"Which element is used to define a generic, client-side, embedded object (e.g., Flash, Java)?",options:["&lt;object&gt;","&lt;embed&gt;","&lt;plugin&gt;","&lt;applet&gt;"],correct:0,explanation:"&lt;object&gt; is used to define a generic, client-side, embedded object."},
+  {id:480,question:"The &lt;applet&gt; tag is:",options:["Deprecated in HTML5.","Required for Java applets.","Used for web workers.","Preferred over &lt;object&gt;."],correct:0,explanation:"The &lt;applet&gt; tag is deprecated in HTML5."},
+  {id:481,question:"Which HTML element is used for providing a list of pre-defined options for an &lt;input&gt; element?",options:["&lt;datalist&gt;","&lt;options&gt;","&lt;select&gt;","&lt;list&gt;"],correct:0,explanation:"&lt;datalist&gt; provides a list of pre-defined options for an &lt;input&gt;."},
+  {id:482,question:"Which attribute of &lt;input&gt; is linked to a &lt;datalist&gt;?",options:["list","id","name","datalist"],correct:0,explanation:"The `list` attribute of &lt;input&gt; links to the `id` of the &lt;datalist&gt;."},
+  {id:483,question:"Which value for `input type` is typically used for a slider control?",options:["range","slider","level","scale"],correct:0,explanation:"type='range' is typically used for a slider control."},
+  {id:484,question:"Which value for `input type` is typically used for a simple number spinner?",options:["number","integer","num","count"],correct:0,explanation:"type='number' is typically used for a simple number spinner."},
+  {id:485,question:"Which HTML feature allows a website to get notified when an element is visible in the viewport?",options:["Intersection Observer API","Visibility API","Element Observer API","Viewport Observer API"],correct:0,explanation:"Intersection Observer API."},
+  {id:486,question:"Which HTML feature allows the browser to automatically manage the loading of resources like images and iframes when they are near the viewport?",options:["Lazy Loading (loading='lazy')","Preload","Fetch Priority","Resource Hints"],correct:0,explanation:"Lazy Loading (loading='lazy')."},
+  {id:487,question:"Which attribute is used on &lt;img&gt; and &lt;iframe&gt; to enable lazy loading?",options:["loading='lazy'","defer-load","load-on-view","lazy-load"],correct:0,explanation:"loading='lazy' is used on &lt;img&gt; and &lt;iframe&gt;."},
+  {id:488,question:"Which element is used to define a short, simple pop-up window or alert box?",options:["&lt;dialog&gt;","&lt;modal&gt;","&lt;alert&gt;","&lt;popup&gt;"],correct:0,explanation:"&lt;dialog&gt; is used to define a short, simple pop-up window or alert box."},
+  {id:489,question:"Which method in JavaScript is used to programmatically open the &lt;dialog&gt; element modally?",options:["dialog.showModal()","dialog.show()","dialog.open()","dialog.display()"],correct:0,explanation:"dialog.showModal() opens the &lt;dialog&gt; element modally."},
+  {id:490,question:"What is the primary purpose of the `manifest` attribute (now deprecated) on &lt;html&gt;?",options:["To enable Application Cache for offline use.","To specify the theme of the page.","To define the page's structure.","To declare the page's metadata."],correct:0,explanation:"To enable Application Cache for offline use (now deprecated in favor of Service Workers)."},
+  {id:491,question:"Which CSS unit is relative to the size of the viewport's width?",options:["vw","vh","rem","em"],correct:0,explanation:"vw (viewport width) is relative to the size of the viewport's width."},
+  {id:492,question:"Which CSS unit is relative to the size of the viewport's height?",options:["vh","vw","rem","em"],correct:0,explanation:"vh (viewport height) is relative to the size of the viewport's height."},
+  {id:493,question:"Which CSS unit is relative to the root element's font size?",options:["rem","em","px","%"],correct:0,explanation:"rem (root em) is relative to the root element's font size."},
+  {id:494,question:"Which CSS unit is relative to the parent element's font size?",options:["em","rem","px","%"],correct:0,explanation:"em is relative to the parent element's font size."},
+  {id:495,question:"The `sizes` attribute on &lt;link rel='icon'&gt; is used for:",options:["Specifying different icon sizes for various devices.","Specifying the font size of the icon.","Specifying the width of the icon.","Specifying the height of the icon."],correct:0,explanation:"Specifying different icon sizes for various devices."},
+  {id:496,question:"Which attribute of &lt;meta&gt; is crucial for responsive design?",options:["name='viewport'","name='responsive'","name='screen'","name='mobile'"],correct:0,explanation:"&lt;meta name='viewport'&gt; is crucial for responsive design."},
+  {id:497,question:"What is the most common value for the `content` of the viewport meta tag?",options:["width=device-width, initial-scale=1.0","width=100%, scale=1.0","width=auto, initial-scale=1.0","width=device-width, scale=0.5"],correct:0,explanation:"width=device-width, initial-scale=1.0 is the most common value."},
+  {id:498,question:"Which attribute of &lt;img&gt; is a hint to the browser for better loading performance?",options:["decoding='async'","decoding='sync'","decoding='auto'","decoding='lazy'"],correct:0,explanation:"decoding='async' is a hint to the browser for better loading performance."},
+  {id:499,question:"Which HTTP header is often used to enforce Content Security Policy (CSP)?",options:["Content-Security-Policy","X-Content-Security-Policy","Content-Type","Cache-Control"],correct:0,explanation:"Content-Security-Policy header is used to enforce CSP."},
+  {id:500,question:"Which attribute is used to provide the title of the table summary (deprecated)?",options:["summary","caption","desc","title"],correct:0,explanation:"summary attribute is used to provide the title of the table summary (deprecated)."}
+  ]
+];
+
+// ============================================
+// GAME STATE & CORE FUNCTIONS (Do not modify below this line)
+// ============================================
+
+var currentQuestionIndex = 0;
+var currentScore = 0;
+var currentQuestions = [];
+var userAnswers = [];
+var questionContainer = document.getElementById('question-container');
+var resultContainer = document.getElementById('result-container');
+var scoreValue = document.getElementById('score-value');
+var questionCounter = document.getElementById('question-counter');
+var totalQuestionsSpan = document.getElementById('total-questions');
+var completionContainer = document.getElementById('completion-container');
+var progressBar = document.getElementById('progress-bar');
+var batchInfo = document.getElementById('batch-info');
+
+function getBatchName(batchIndex) {
+  var names = [
+    "HTML Basics",
+    "Tags &amp; Elements",
+    "Attributes",
+    "Forms &amp; Inputs",
+    "Tables &amp; Lists",
+    "Semantic HTML",
+    "Multimedia",
+    "Graphics &amp; Canvas",
+    "APIs &amp; Storage",
+    "Advanced Topics"
+  ];
+  return names[batchIndex] || "Batch " + (batchIndex + 1);
+}
+
+function loadBatch(batchIndex) {
+  if (batchIndex >= 0 && batchIndex < totalBatches) {
+    currentBatchIndex = batchIndex;
+    currentQuestions = allQuestionBatches[currentBatchIndex];
+    currentQuestionIndex = 0;
+    currentScore = 0;
+    scoreValue.textContent = currentScore;
+    
+    // Update batch info and total questions
+    document.getElementById('batch-selector').value = batchIndex;
+    totalQuestionsSpan.textContent = currentQuestions.length;
+    batchInfo.textContent = 'Batch ' + (currentBatchIndex + 1) + '/' + totalBatches + ' • ' + currentQuestions.length + ' Questions (' + getBatchName(currentBatchIndex) + ')';
+    
+    questionContainer.style.display = 'block';
+    resultContainer.style.display = 'none';
+    completionContainer.style.display = 'none';
+    
+    showQuestion(currentQuestionIndex);
+    updateProgressBar();
+  }
+}
+
+function showQuestion(index) {
+  if (index >= currentQuestions.length) return;
+
+  var q = currentQuestions[index];
+  var optionsHtml = '';
+  
+  for (var i = 0; i < q.options.length; i++) {
+    // Responsive design: Adjusted padding/margin for better mobile tap target
+    optionsHtml += `
+      <div class="option" onclick="checkAnswer(${i})" style="margin: 15px 0; padding: 18px 20px; border: 1px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: background 0.2s, border-color 0.2s;">
+        ${q.options[i]}
+      </div>
+    `;
+  }
+
+  questionContainer.innerHTML = `
+    <div class="question-card">
+      <p style="font-size: 18px; font-weight: bold; margin-top: 0;">${index + 1}. ${q.question}</p>
+      ${optionsHtml}
+    </div>
+  `;
+  questionCounter.textContent = index + 1;
+}
+
+// MCQ LOGIC CHECK: Score system, Next Question, Batch switching, Progress bar logic updated with colors
+function checkAnswer(selectedIndex) {
+  var options = questionContainer.querySelectorAll('.option');
+  var correctIndex = currentQuestions[currentQuestionIndex].correct;
+  
+  for (var i = 0; i < options.length; i++) {
+    options[i].style.pointerEvents = 'none';
+    options[i].style.cursor = 'default';
+  }
+  
+  var isCorrect = selectedIndex === correctIndex;
+  
+  if (isCorrect) {
+    currentScore++;
+    scoreValue.textContent = currentScore;
+    
+    // COLOR SCHEME: Correct answer: Green (#28a745)
+    options[selectedIndex].style.background = '#d4edda'; // Light green
+    options[selectedIndex].style.borderColor = '#28a745';
+    resultContainer.style.background = '#d4edda'; // Light green
+    resultContainer.style.borderColor = '#28a745';
+    
+    resultContainer.innerHTML = `
+      <p style="color: #28a745; font-weight: bold; margin-top: 0;">✅ Correct!</p>
+      <p style="color: #6c757d;">Explanation: ${currentQuestions[currentQuestionIndex].explanation}</p>
+      <button onclick="nextQuestion()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Next Question &gt;</button>
+    `;
+  } else {
+    // COLOR SCHEME: Wrong answer: Red (#dc3545)
+    options[selectedIndex].style.background = '#f8d7da'; // Light Red for selected wrong
+    options[selectedIndex].style.borderColor = '#dc3545';
+    
+    // Highlight correct answer in green
+    options[correctIndex].style.background = '#d4edda'; 
+    options[correctIndex].style.borderColor = '#28a745'; 
+    
+    resultContainer.style.background = '#f8d7da'; // Light Red for result box
+    resultContainer.style.borderColor = '#dc3545';
+    
+    resultContainer.innerHTML = `
+      <p style="color: #dc3545; font-weight: bold; margin-top: 0;">❌ Incorrect.</p>
+      <p style="color: #6c757d;">The correct answer is: <strong>${currentQuestions[currentQuestionIndex].options[correctIndex]}</strong></p>
+      <p style="color: #6c757d;">Explanation: ${currentQuestions[currentQuestionIndex].explanation}</p>
+      <button onclick="nextQuestion()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Next Question &gt;</button>
+    `;
+  }
+
+  resultContainer.style.display = 'block';
+  updateProgressBar();
+}
+
+function nextQuestion() {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < currentQuestions.length) {
+    showQuestion(currentQuestionIndex);
+    resultContainer.style.display = 'none';
+  } else {
+    showCompletion();
+  }
+}
+
+function updateProgressBar() {
+  var total = currentQuestions.length;
+  var completed = currentQuestionIndex;
+  var percentage = total > 0 ? (completed / total) * 100 : 0;
+  progressBar.style.width = percentage + '%';
+}
+
+function showCompletion() {
+  var totalQuestionsInBatch = currentQuestions.length;
+  var percentage = totalQuestionsInBatch > 0 ? Math.round((currentScore / totalQuestionsInBatch) * 100) : 0;
+  
+  completionContainer.style.display = 'block';
+  completionContainer.innerHTML = `
+    <h2>🎉 Batch Completed!</h2>
+    <p style="font-size: 20px;">Final Score: ${currentScore}/${totalQuestionsInBatch} (${percentage}%)</p>
+    <div style="margin-top: 15px;">
+      <button onclick="loadBatch(currentBatchIndex)" style="background: white; color: #28a745; border: 1px solid #28a745; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+        🔄 Restart Batch
+      </button>
+      <button onclick="nextBatch()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+        ⏭️ Next Batch
+      </button>
+    </div>
+  `;
+  questionContainer.style.display = 'none';
+  resultContainer.style.display = 'none';
+}
+
+function nextBatch() {
+  var nextIndex = currentBatchIndex + 1;
+  if (nextIndex < totalBatches) {
+    loadBatch(nextIndex);
+  } else {
+    alert('Congratulations! You have completed all batches.');
+    loadBatch(0); // Restart from first batch
+  }
+}
+
+// Initial load
+window.onload = function() {
+  loadBatch(0);
+  setTimeout(loadAds, 1000); // Ads load after 5 second
+};
+
+// ADS ADD करें: JavaScript में Ads load करने का code
+function loadAds() {
+  // Ad 1 (Question के बाद)
+  var adZone1 = document.getElementById('ad-zone-1');
+  if (adZone1 && adZone1.children.length === 0) {
+    var adScript1 = document.createElement('script');
+    adScript1.innerHTML = `(function(s){
+      s.dataset.zone='10319771';
+      s.src='https://nap5k.com/tag.min.js';
+    })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
+    adZone1.appendChild(adScript1);
+  }
+  
+  // Ad 2 (Page के नीचे)
+  var adZone2 = document.getElementById('ad-zone-2');
+  if (adZone2 && adZone2.children.length === 0) {
+    var adScript2 = document.createElement('script');
+    adScript2.innerHTML = `(function(s){
+      s.dataset.zone='10319769';
+      s.src='https://nap5k.com/tag.min.js';
+    })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
+    adZone2.appendChild(adScript2);
+  }
+}
+</script>
+</body>
+</html>
