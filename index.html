@@ -4,7 +4,7 @@
   <title>ARTN LABS Academy</title>
 
   <!-- Monetag Verification -->
-  <meta name="monetag" content="5cf77299c9ebf7da448a37d0d3916482">
+  <meta name="monetag" content="7c58ce94cdb234e9e4516482e481d669">
 
 </head>
     <meta charset="UTF-8" />
@@ -834,35 +834,39 @@ function nextBatch() {
 }
 
 // Initial load
-window.onload = function() {
+window.onload = function () {
   loadBatch(0);
-  setTimeout(loadAds, 1000); // Ads load after 5 second
+  setTimeout(loadAds, 1000); // ads load after 1 second
 };
 
-// ADS ADD करें: JavaScript में Ads load करने का code
+// 🔥 ARTN LABS ADS LOADER (UPDATED)
 function loadAds() {
-  // Ad 1 (Question के बाद)
+
+  // 🔹 Ad 1 – Question ke baad
   var adZone1 = document.getElementById('ad-zone-1');
   if (adZone1 && adZone1.children.length === 0) {
     var adScript1 = document.createElement('script');
     adScript1.innerHTML = `(function(s){
-      s.dataset.zone='10319771';
+      s.dataset.zone='10322839';
       s.src='https://nap5k.com/tag.min.js';
-    })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
+    })([document.documentElement, document.body].filter(Boolean).pop()
+      .appendChild(document.createElement('script')));`;
     adZone1.appendChild(adScript1);
   }
-  
-  // Ad 2 (Page के नीचे)
+
+  // 🔹 Ad 2 – Page ke bottom
   var adZone2 = document.getElementById('ad-zone-2');
   if (adZone2 && adZone2.children.length === 0) {
     var adScript2 = document.createElement('script');
     adScript2.innerHTML = `(function(s){
-      s.dataset.zone='10319769';
-      s.src='https://nap5k.com/tag.min.js';
-    })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
+      s.dataset.zone='10322837';
+      s.src='https://gizokraijaw.net/vignette.min.js';
+    })([document.documentElement, document.body].filter(Boolean).pop()
+      .appendChild(document.createElement('script')));`;
     adZone2.appendChild(adScript2);
   }
 }
+
 </script>
 </body>
 </html>
